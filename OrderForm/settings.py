@@ -1,3 +1,5 @@
+import os
+from pathlib import Path
 """
 Django settings for OrderForm project.
 
@@ -40,6 +42,8 @@ INSTALLED_APPS = [
     'OrderForm',
 ]
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -55,7 +59,7 @@ ROOT_URLCONF = 'OrderForm.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, '')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
