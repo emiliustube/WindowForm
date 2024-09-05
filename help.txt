@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Window Order Form</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1500px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0;
+        }
+
+        .company-info {
+            text-align: left;
+            max-width: 70%;
+        }
+
+        header img {
+            max-width: 150px;
+            height: auto;
+            margin-left: 20px;
+        }
+
+        .order-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .order-info div {
+            flex: 1;
+        }
+
+        .order-info p {
+            margin: 5px 0;
+        }
+
+        .order-table table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .order-table th, .order-table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .order-table th {
+            background-color: #f4f4f4;
+        }
+
+        .extra-options {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-top: 1px solid #ccc;
+        }
+
+        .extra-options > div {
+            flex: 1;
+            margin: 0 5px;
+        }
+
+        footer {
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+
+        footer ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        footer ul li {
+            margin-bottom: 5px;
+        }
+
+        /* Custom styles for the select box */
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #ffffff;
+        }
+
+        select option {
+            color: #000000;
+        }
+
+        /* Custom styles for the selection color */
+        select:focus {
+            border-color: #40E0D0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="company-info">
+                <h1>WINDOW ORDER FORM</h1>
+                <p><strong>Shems Homes, Inc.</strong></p>
+                <p>Architectural Home Plans Sales Company</p>
+                <p>P.O. Box 17653 South Lake Tahoe, CA 96151</p>
+                <p>Office (888) 960-5263</p>
+                <p><a href="http://www.shemshomes.com">www.shemshomes.com</a></p>
+            </div>
+            <img src="images.png" alt="Company Logo">
+        </header>
+
+        <section class="order-info">
+            <div>
+                <p>Account Name: <input type="text" name="accountName"></p>
+                <p>Job Name/PO: <input type="text" name="jobName"></p>
+                <p>Date: <input type="date" name="date"></p>
+            </div>
+            <div>
+                <p>Contact Phone: <input type="tel" name="contactPhone"></p>
+                <p>Contact Email: <input type="email" name="contactEmail"></p>
+                <p>Ship To: <input type="text" name="shipTo"></p>
+            </div>
+        </section>
+
+        <section class="order-table">
+            <table id="orderTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>QTY</th>
+                        <th>Width</th>
+                        <th>X</th>
+                        <th>Height</th>
+                        <th>Temp GL</th>
+                        <th>Window Types</th>
+                        <th>LH</th>
+                        <th>RH</th>
+                        <th>Build-In Blinds</th>
+                        <th>Notes/Other Info</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Rows will be added dynamically -->
+                </tbody>
+            </table>
+        </section>
+
+        <footer>
+            <ul>
+                <li><strong>Price Basis:</strong> EXW</li>
+                <li><strong>Payment Terms:</strong> 80% deposit by T/T, 20% balance before shipment</li>
+                <li><strong>Lead Time:</strong> 4 to 5 weeks after receiving an 80% down payment and confirming all drawing details</li>
+                <li><strong>Estimated Time of Arrival:</strong> 5 to 6 weeks from the departure date</li>
+                <li><strong>Packaging:</strong> Price includes export packaging to protect goods from damage</li>
+                <li><strong>Quotation Validity:</strong> Based on shop drawings approved by the buyer. Valid for 30 days after issuance.</li>
+            </ul>
+        </footer>
+
+        <button id="submitOrder">Submit Order</button>
+    </div>
+
+    <script>
+        $(document).ready(function(){
+            // Function to generate rows
+            function generateRow(index) {
+                return `
+                    <tr class="clickable-row">
+                        <td>${index}</td>
+                        <td><input type="number" name="qty${index}"></td>
+                        <td><input type="number" name="width${index}"></td>
+                        <td>x</td>
+                        <td><input type="number" name="height${index}"></td>
+                        <td><input type="checkbox" name="tempGL${index}"></td>
+                        <td>
+                            <select name="windowType${index}">
+                                <option value="">--Select--</option>
+                                <option value="XO or OX">XO or OX: 2 Lite Slider X is Active</option>
+                                <option value="XOX">XOX: 3 Lite Slider X is Active</option>
+                                <option value="CSMT">CSMT: Casement</option>
+                                <option value="SH">SH: Single Hung</option>
+                                <option value="PD">PD: Patio Door</option>
+                                <option value="DH">DH: Double Hung</option>
+                                <option value="XX">XX: 2 Lite (X Active)</option>
+                                <option value="PW">PW: Picture Window</option>
+                                <option value="AWN">AWN: Awning</option>
+                                <option value="FR">FR: Swing Door</option>
+                                <option value="BF">BF: Bifold Window</option>
+                                <option value="TT">TT: Tilt and Turn</option>
+                                <option value="BW">BW: Bay Window</option>
+                            </select>
+                        </td>
+                        <td><input type="checkbox" name="lh${index}"></td>
+                        <td><input type="checkbox" name="rh${index}"></td>
+                        <td><input type="checkbox" name="buildInBlinds${index}"></td>
+                        <td><input type="text" name="notes${index}"></td>
+                    </tr>
+                    <tr class="expandable-row">
+                        <td colspan="11">
+                            <div class="extra-options">
+                                <div>
+                                    <p><strong>Size Options:</strong></p>
+                                    <p><input type="checkbox" name="sizeOptions[]" value="Net/Exact Size"> Net/Exact Size</p>
+                                    <p><input type="checkbox" name="sizeOptions[]" value="Rough Opening"> Rough Opening</p>
+                                </div>
+                                <div>
+                                    <p><strong>Color Options:</strong></p>
+                                    <p><input type="checkbox" name="colorOptions[]" value="Matt Black"> Matt Black</p>
+                                    <p><input type="checkbox" name="colorOptions[]" value="Matt Chocolate"> Matt Chocolate</p>
+                                    <p><input type="checkbox" name="colorOptions[]" value="Matt Dark Grey"> Matt Dark Grey</p>
+                                    <p><input type="checkbox" name="colorOptions[]" value="Matt Light Grey"> Matt Light Grey</p>
+                                    <p><input type="checkbox" name="colorOptions[]" value="Champagne"> Champagne</p>
+                                    <p><input type="checkbox" name="colorOptions[]" value="Pure White"> Pure White</p>
+                                </div>
+                                <div>
+                                    <p><strong>Frame Options:</strong></p>
+                                    <p><input type="checkbox" name="frameOptions[]" value="Nail Fin"> Nail Fin</p>
+                                    <p><input type="checkbox" name="frameOptions[]" value="Stucco/Retro"> Stucco/Retro</p>
+                                    <p><input type="checkbox" name="frameOptions[]" value="Block"> Block</p>
+                                </div>
+                                <div>
+                                    <p><strong>Grille Options:</strong></p>
+                                    <p><input type="checkbox" name="grilleOptions[]" value="NA"> NA</p>
+                                    <p><input type="checkbox" name="grilleOptions[]" value="YES"> YES</p>
+                                </div>
+                                <div>
+                                    <p><strong>Glass Options:</strong></p>
+                                    <p><input type="checkbox" name="glassOptions[]" value="Low-E"> Low-E</p>
+                                    <p><input type="checkbox" name="glassOptions[]" value="Grey Tinted"> Grey Tinted</p>
+                                    <p><input type="checkbox" name="glassOptions[]" value="Grey Reflective"> Grey Reflective</p>
+                                    <p><input type="checkbox" name="glassOptions[]" value="Blue"> Blue</p>
+                                </div>
+                                <div>
+                                    <p><strong>Window Operating Types:</strong></p>
+                                    <ul>
+                                        <li><strong>XO or OX:</strong> 2 Lite Slider X is Active</li>
+                                        <li><strong>XOX:</strong> 3 Lite Slider X is Active</li>
+                                        <li><strong>CSMT:</strong> Casement</li>
+                                        <li><strong>SH:</strong> Single Hung</li>
+                                        <li><strong>PD:</strong> Patio Door</li>
+                                        <li><strong>DH:</strong> Double Hung</li>
+                                        <li><strong>XX:</strong> 2 Lite (X Active)</li>
+                                        <li><strong>PW:</strong> Picture Window</li>
+                                        <li><strong>AWN:</strong> Awning</li>
+                                        <li><strong>FR:</strong> Swing Door</li>
+                                        <li><strong>BF:</strong> Bifold Window</li>
+                                        <li><strong>TT:</strong> Tilt and Turn</li>
+                                        <li><strong>BW:</strong> Bay Window</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+
+            // Add rows to the table
+            const rows = Array.from({ length: 24 }, (_, i) => generateRow(i + 1)).join('');
+            $("#orderTable tbody").html(rows);
+
+            // Toggle expandable rows
+            $(".expandable-row").hide();
+            $(".clickable-row").click(function(){
+                $(this).next(".expandable-row").toggle();
+            });
+
+            // Handle form submission
+            $("#submitOrder").click(function() {
+                const formData = $("input, select").serialize(); // Serialize form data
+                $.ajax({
+                    type: "POST",
+                    url: "submit_order.php", // Adjust the path if needed
+                    data: formData,
+                    success: function(response) {
+                        alert("Order submitted successfully!");
+                    },
+                    error: function() {
+                        alert("An error occurred while submitting the order.");
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

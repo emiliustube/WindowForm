@@ -1,0 +1,605 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Order Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+        }
+        .logo img {
+            width: 50px;
+            margin-top: -150px;
+            margin-left: 5px;
+            transform: translateY(-20px);
+        }
+
+        .container2 {
+            max-width: 1800px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .info {
+            text-align: left; /* Center align the text */
+            margin: 10px 5; /* Add some space above and below the text */
+            margin-left: 50px;
+            font-weight: bold; /* Make the text bold */
+            font-size: 20px; /* Adjust the font size as needed */
+            color: #000; /* Change color if needed */
+        }
+
+        .black-text {
+            color: #000000; /* Black color for the text before the colon */
+            font-weight: 50; /* Optional: Make the text bold */
+            font-style: italic;
+        }
+
+        .gray-text {
+            color: #808080; /* Gray color for the text after the colon */
+            font-weight: 50;
+            font-style: italic;
+        }
+
+
+        .confirmation-container {
+            max-width: 1800px;
+            margin: auto;
+            padding: 20px;
+            color: #000000;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f2f2f2;
+            border-bottom: 2px solid #A9A9A9;
+        }
+        .header2 {
+            background-color: #f9f9f9;
+            display: flex;
+            align-items: flex-start; /* Aligns content to the top */
+            padding-bottom: 0px;
+            margin-top: -240px; /* Moves the container upwards */
+            width: 70%;
+            margin-left: -60px; /* Aligns the container to the left */
+            justify-content: flex-start; /* Aligns content to the left */
+        }
+
+        h1 {
+            color: #333333;
+            font-size: 45px;
+            margin-bottom: 0;
+        }
+        .company-info p, .order-details p {
+            margin: 0;
+            padding: 5px 0;
+        }
+        .company-info {
+            flex: 1;
+            padding-left: 10px;
+            color:#808080;
+        }
+        .link {
+            color: #808080;
+            text-decoration: none;
+        }
+        .order-details {
+            flex: 2;
+            padding-left: 5px;
+        }
+        .order-details table {
+            border: none;
+            width: 100%;
+        }
+        .order-details td {
+            border: none;
+            padding: 5px 150px;
+        }
+        .order-details td:first-child {
+            padding-right: 15px;
+        }
+        .order-details strong {
+            font-weight: normal;
+            color: #333333;
+        }
+        .order-details span {
+            border-bottom: 1px solid #A9A9A9;
+            color: #000000;
+            font-weight: normal;
+        }
+        .back-button {
+            margin-bottom: -150px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        ul li {
+            background-color: #ffffff;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            padding: 10px;
+            text-align: left;
+        }
+        ul li strong {
+            color: #333333;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .editable-number {
+            width: 60%;
+            padding: 4px;
+            box-sizing: border-box;
+            border: none;
+            text-align: left;
+            background-color: transparent;
+            font-size: 16px;
+        }
+        .summary-container {
+            max-width: 480px;
+            margin-top: 20px;
+            margin-right: 2.5%;
+            margin-left: auto;
+        }
+        .summary-table {
+            width: 110%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background-color: transparent;
+        }
+        .summary-table td {
+            padding: 8px;
+        }
+        .summary-table input {
+            width: 80%;
+            padding: 5px;
+            box-sizing: border-box;
+            border: none;
+            font-size: 16px;
+        }
+        .summary-table span {
+            font-weight: bold;
+            color: #333333;
+        }
+        .currency-symbol {
+            font-size: 16px;
+            margin-right: 5px;
+            font-weight: 100;
+        }
+
+        .header {
+                background-color: rgb(220, 220, 220);
+                display: flex;
+                align-items: left;
+                border-bottom: none;
+                padding-bottom: 0px;
+                margin-bottom: 20px;
+            }
+
+            .logo img {
+                width: 40px;
+                margin-top: -30px;
+                margin-left: 45px; /* Moves the logo 40px to the right */
+                margin-right: 20px;
+            }
+
+
+
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Restore table data from sessionStorage
+    function restoreTableData() {
+        const savedData = JSON.parse(sessionStorage.getItem('tableData') || '[]'); // Default to empty array if null
+
+        if (savedData && Array.isArray(savedData)) {
+            document.querySelectorAll('.unit-price').forEach((input, index) => {
+                input.value = savedData[index]?.unitPrice || 0;
+            });
+            document.querySelectorAll('.discount').forEach((input, index) => {
+                input.value = savedData[index]?.discount || 0;
+            });
+            document.querySelectorAll('.total-price').forEach((span, index) => {
+                span.textContent = savedData[index]?.totalPrice || '0.00';
+            });
+
+            // Restore additional data
+            const lastItem = savedData[savedData.length - 1];
+            if (lastItem) {
+                document.querySelector('#shipping-price').value = lastItem['shipping-price'] || 0;
+                document.querySelector('#extra-discount').value = lastItem['extra-discount'] || 0;
+                document.querySelector('#vat-percentage').value = lastItem['vat-percentage'] || 0;
+                
+                // Restore the new inputs
+                document.querySelector('input[name="price-basis"]').value = lastItem['price-basis'] || '';
+                document.querySelector('input[name="payment-terms"]').value = lastItem['payment-terms'] || '';
+                document.querySelector('input[name="lead-time"]').value = lastItem['lead-time'] || '';
+                document.querySelector('input[name="arrival-time"]').value = lastItem['arrival-time'] || '';
+                document.querySelector('input[name="packing"]').value = lastItem['packing'] || '';
+                document.querySelector('input[name="quotation-validity"]').value = lastItem['quotation-validity'] || '';
+
+                updateSummaryTable(); // Call this to ensure the summary is updated
+            }
+        } else {
+            console.error("Saved table data is not available or not in the correct format.");
+        }
+    }
+
+    // Save table data to sessionStorage
+    function saveTableData() {
+        const tableData = [];
+
+        // Saving data from the main table
+        document.querySelectorAll('tbody tr').forEach((row) => {
+            const unitPriceInput = row.querySelector('.unit-price');
+            const discountInput = row.querySelector('.discount');
+            const totalPriceElement = row.querySelector('.total-price');
+
+            if (unitPriceInput && discountInput && totalPriceElement) {
+                const unitPrice = unitPriceInput.value || 0;
+                const discount = discountInput.value || 0;
+                const totalPrice = totalPriceElement.textContent || '0.00';
+                tableData.push({ unitPrice, discount, totalPrice });
+            }
+        });
+
+        // Safely access the Shipping Price, Extra Discount, VAT, and the new inputs
+        const shippingPriceInput = document.querySelector('#shipping-price');
+        const extraDiscountInput = document.querySelector('#extra-discount');
+        const vatInput = document.querySelector('#vat-percentage');
+
+        const shippingPrice = shippingPriceInput ? shippingPriceInput.value || 0 : 0;
+        const extraDiscount = extraDiscountInput ? extraDiscountInput.value || 0 : 0;
+        const vat = vatInput ? vatInput.value || 0 : 0;
+
+        // Access the new inputs
+        const priceBasisInput = document.querySelector('input[name="price-basis"]');
+        const paymentTermsInput = document.querySelector('input[name="payment-terms"]');
+        const leadTimeInput = document.querySelector('input[name="lead-time"]');
+        const arrivalTimeInput = document.querySelector('input[name="arrival-time"]');
+        const packingInput = document.querySelector('input[name="packing"]');
+        const quotationValidityInput = document.querySelector('input[name="quotation-validity"]');
+
+        const priceBasis = priceBasisInput ? priceBasisInput.value || '' : '';
+        const paymentTerms = paymentTermsInput ? paymentTermsInput.value || '' : '';
+        const leadTime = leadTimeInput ? leadTimeInput.value || '' : '';
+        const arrivalTime = arrivalTimeInput ? arrivalTimeInput.value || '' : '';
+        const packing = packingInput ? packingInput.value || '' : '';
+        const quotationValidity = quotationValidityInput ? quotationValidityInput.value || '' : '';
+
+        // Add the additional data to the tableData array
+        tableData.push({
+            'shipping-price': shippingPrice,
+            'extra-discount': extraDiscount,
+            'vat-percentage': vat,
+            'price-basis': priceBasis,
+            'payment-terms': paymentTerms,
+            'lead-time': leadTime,
+            'arrival-time': arrivalTime,
+            'packing': packing,
+            'quotation-validity': quotationValidity
+        });
+
+        // Save everything to session storage
+        sessionStorage.setItem('tableData', JSON.stringify(tableData));
+    }
+
+    // Call restore function on page load
+    restoreTableData();
+    
+            // Save data when the back button is clicked
+            const backButton = document.querySelector('.back-button button');
+            if (backButton) {
+                backButton.addEventListener('click', function() {
+                    saveTableData();
+                    window.history.back();
+                });
+            }
+    
+            // Update total prices when input changes
+            document.addEventListener('input', function(event) {
+                if (event.target.matches('.unit-price, .discount')) {
+                    updateTotalPrices();
+                } else if (event.target.matches('.editable-number')) {
+                    updateSummaryTable();
+                }
+            });
+    
+            function updateTotalPrices() {
+                document.querySelectorAll('tbody tr').forEach(function(row) {
+                    if (row.cells.length >= 3) {
+                        const qty = parseFloat(row.querySelector('.item-qty')?.textContent) || 0;
+                        const unitPrice = parseFloat(row.querySelector('.unit-price')?.value) || 0;
+                        const discount = parseFloat(row.querySelector('.discount')?.value) || 0;
+    
+                        const total = qty * unitPrice * (1 - discount / 100);
+                        const totalPriceElement = row.querySelector('.total-price');
+    
+                        if (totalPriceElement) {
+                            totalPriceElement.textContent = total.toFixed(2);
+                        }
+                    }
+                });
+    
+                // Recalculate the summary table after updating total prices
+                updateSummaryTable();
+            }
+    
+            function updateSummaryTable() {
+                let totalItemPrice = 0;
+                document.querySelectorAll('.total-price').forEach(function(priceElement) {
+                    totalItemPrice += parseFloat(priceElement.textContent) || 0;
+                });
+    
+                const shippingPrice = parseFloat(document.getElementById('shipping-price')?.value) || 0;
+                const grandTotal = totalItemPrice + shippingPrice;
+                document.getElementById('grand-total').textContent = grandTotal.toFixed(2);
+    
+                const extraDiscount = parseFloat(document.getElementById('extra-discount')?.value) || 0;
+                const discountedTotal = grandTotal * (extraDiscount / 100);
+                document.getElementById('discounted-total').textContent = discountedTotal.toFixed(2);
+    
+                const vatPercentage = parseFloat(document.getElementById('vat-percentage')?.value) || 0;
+                const vatAmount = (grandTotal - discountedTotal) * (vatPercentage / 100);
+                document.getElementById('vat-amount').textContent = vatAmount.toFixed(2);
+    
+                const grandTotalVAT = grandTotal - discountedTotal + vatAmount;
+                document.getElementById('grand-total-vat').textContent = grandTotalVAT.toFixed(2);
+            }
+    
+            // Initial calculation
+            updateTotalPrices();
+    
+            // Event Listeners for Extra Fields
+            document.getElementById('shipping-price')?.addEventListener('input', updateSummaryTable);
+            document.getElementById('extra-discount')?.addEventListener('input', updateSummaryTable);
+            document.getElementById('vat-percentage')?.addEventListener('input', updateSummaryTable);
+    
+            document.getElementById('save-pdf').addEventListener('click', function () {
+                const element = document.querySelector('.confirmation-container');
+                if (!element) {
+                    alert('The element with class "confirmation-container" was not found.');
+                    return;
+                }
+                const opt = {
+                    filename: 'order_confirmation.pdf',
+                    margin: 0.5,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 1.5 },
+                    jsPDF: { unit: 'in', format: [16,17], orientation: 'landscape' }
+                };
+    
+                html2pdf().from(element).set(opt).save();
+            });
+        });
+    </script>
+    
+    
+</head>
+<body>
+    {% load custom_filters %}
+    <div class="confirmation-container">
+        <div class="header">
+            <div class="logo">
+                <img src="{% static 'images/Icon.png' %}" alt="Shems Homes Logo">
+            </div>
+            <div class="company-info">
+                <h1 style='font-family: "Times New Roman", Times, serif; font-weight: normal; font-size: 40px; font-weight: normal;'>
+                    {% if order.QO == 'quote' %}
+                        Window Quote Form
+                    {% else %}
+                        Window Order Form
+                    {% endif %}
+                </h1>
+                <p>Shems Homes, Inc.<br>
+                Architectural Home Plans Sales Company<br>
+                P.O. Box 17653 South Lake Tahoe, CA 96151<br>
+                Office (888) 960-5263<br>
+                <a href="http://www.shemshomes.com" class="link">www.shemshomes.com</a></p>
+            </div>
+            <div class="order-details"> 
+                <table>
+                    <tr>
+                        <td><strong>Name:</strong> <span>{{ order.name }}</span></td>
+                        <td><strong>Contact Phone:</strong> <span>{{ order.contact_phone }}</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Email:</strong> <span>{{ order.email }}</span></td>
+                        <td><strong>Job Name/PO:</strong> <span>{{ order.job_name }}</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Date:</strong> <span>{{ order.date }}</span></td>
+                        <td><strong>Ordered By:</strong> <span>{{ order.ordered_by }}</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ship To:</strong> <span>{{ order.ship_to }}</span></td>
+                        <td><strong>Address:</strong> <span>{{ order.address }}</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Type:</strong> <span>{{ order.QO }}</span></td>
+                        <td><strong>Submitted by:</strong> <span>{{ order.signature }}</span></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="back-button">
+                <button type="submit">Back -></button>
+            </div>
+        </div>
+        <h2>Order Items:</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 1%; font-weight: normal;">#</th>
+                    <th style="width: 45%; font-weight: normal;">Item Description</th>
+                    <th style="width: 5%; font-weight: normal;">QTY</th>
+                    <th style="width: 5%; font-weight: normal;">Unit Price ($)</th>
+                    <th style="width: 5%; font-weight: normal;">Discount (%)</th>
+                    <th style="width: 10%; font-weight: normal;">Total Item Price ($)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td class="description">{{ item.description }}</td>
+                    <td><span class="item-qty">{{ item.quantity|floatmul:item.width|floatmul:item.height }}</span></td>
+                    <td><input type="number" step="any" class="editable-number unit-price" value="{{ item.unit_price }}" oninput="calculateTotalPrice(this)" /> $</td>
+                    <td><input type="number" step="any" class="editable-number discount" value="{{ item.discount }}" oninput="calculateTotalPrice(this)" /> %</td>
+                    <td><span class="total-price">{{ item.total_price|floatformat:2 }}</span> $</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="summary-container">
+            <table class="summary-table">
+                <tbody>
+                    <tr>
+                        <td style="font-weight: bold;">Shipping Price:</td>
+                        <td>
+                            <input type="number" step="any" id="shipping-price" class="editable-number" value="0.00" oninput="updateSummaryTable()" style="width: 25%;"/><span class="currency-symbol" style="font-weight: 100;">$</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: bold;">Grand Total:</td>
+                        <td><span id="grand-total">0.00</span> $</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; font-weight: bold;">
+                                Extra Discount: <input type="number" step="any" id="extra-discount" class="editable-number" value="0.00" oninput="updateSummaryTable()" style="width: 60px; margin-left: 10px; margin-right: 5px;" />%
+                            </div>
+                        </td>
+                        <td><span id="discounted-total">0.00</span> $</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; font-weight: bold;">
+                                VAT: <input type="number" step="any" id="vat-percentage" class="editable-number" value="0.00" oninput="updateSummaryTable()" style="width: 60px; margin-left: 10px; margin-right: 5px;" />%
+                            </div>
+                        </td>
+                        <td><span id="vat-amount">0.00</span> $</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: bold;">Grand Total VAT Included:</td>
+                        <td><span id="grand-total-vat">0.00</span> $</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="container2">
+            <div class="header2">
+                <div class="info">
+                <form method="post" action="/">
+                    <p>Please note the following terms for our quotation:</p>
+                    <p><span class="black-text">Price Basis:</span> <input type="text" name="price-basis" class="gray-text" value="EXW" style="border: none; background-color: #f9f9f9; font-size: large;"></span></p>
+                    <p><span class="black-text">Payment Terms:</span> <input type="text" name="payment-terms" class="gray-text" value="80% deposit by T/T, 20% balance before shipment" style="border: none; background-color: #f9f9f9; font-size: large; width: 500px;"></span></p>
+             <p><span class="black-text">Lead Time:</span> <input type="text" name="lead-time" class="gray-text" value="4 to 5 weeks after receiving an 80% down payment and confirming all drawing details" style="border: none; background-color: #f9f9f9; font-size: large; width: 700px;"></span></p>
+                 <p><span class="black-text">Estimated Time of Arrival:</span> <input type="text" name="arrival-time" class="gray-text" value="5 to 6 weeks from the departure date" style="border: none; background-color: #f9f9f9; font-size: large; width: 700px;"></span></p>
+                    <p><span class="black-text">Packaging:</span> <input type="text" name="packing" class="gray-text" value="Price includes export packaging to protect goods from damage" style="border: none; background-color: #f9f9f9; font-size: large; width: 700px;"></span></p>
+                    <p><span class="black-text">Quotation Validity:</span> <input type="text" name="quotation-validity" class="gray-text" value="Based on shop drawings approved by the buyer. Valid for 30 days after issurance" style="border: none; background-color: #f9f9f9; font-size: large; width: 700px;"></span></p>
+                </form>
+                </div>
+            </div>
+        
+    </div>
+</div>
+    
+    <button id="save-pdf" style="margin-left: 0; margin-top: 20px;">Save as PDF</button>
+    
+    <script>
+        document.addEventListener('input', function(event) {
+            if (event.target.matches('.unit-price, .discount')) {
+                updateTotalPrices();
+            } else if (event.target.matches('.editable-number')) {
+                updateSummaryTable();
+            }
+        });
+    
+        function updateTotalPrices() {
+            document.querySelectorAll('tbody tr').forEach(function(row) {
+                if (row.cells.length >= 3) {
+                    var qty = parseFloat(row.querySelector('.item-qty').textContent) || 0;
+                    var unitPrice = parseFloat(row.querySelector('.unit-price').value) || 0;
+                    var discount = parseFloat(row.querySelector('.discount').value) || 0;
+    
+                    var total = qty * unitPrice * (1 - discount / 100);
+                    var totalPriceElement = row.querySelector('.total-price');
+                    
+                    if (totalPriceElement) {
+                        totalPriceElement.textContent = total.toFixed(2);
+                    }
+                }
+            });
+    
+            // Recalculate the summary table after updating total prices
+            updateSummaryTable();
+        }
+    
+        function updateSummaryTable() {
+            let totalItemPrice = 0;
+            document.querySelectorAll('.total-price').forEach(function(priceElement) {
+                totalItemPrice += parseFloat(priceElement.textContent) || 0;
+            });
+    
+            let shippingPrice = parseFloat(document.getElementById('shipping-price').value) || 0;
+            let grandTotal = totalItemPrice + shippingPrice;
+            document.getElementById('grand-total').textContent = grandTotal.toFixed(2);
+    
+            let extraDiscount = parseFloat(document.getElementById('extra-discount').value) || 0;
+            let discountedTotal = grandTotal * (extraDiscount / 100);
+            document.getElementById('discounted-total').textContent = discountedTotal.toFixed(2);
+    
+            let vatPercentage = parseFloat(document.getElementById('vat-percentage').value) || 18;
+            let vatAmount = (grandTotal - discountedTotal) * (vatPercentage / 100);
+            document.getElementById('vat-amount').textContent = vatAmount.toFixed(2);
+    
+            let grandTotalVAT = grandTotal - discountedTotal + vatAmount;
+            document.getElementById('grand-total-vat').textContent = grandTotalVAT.toFixed(2);
+        }
+    
+        // Initial calculation
+        updateTotalPrices();
+    
+        // Event Listeners for Extra Fields
+        document.getElementById('shipping-price').addEventListener('input', updateSummaryTable);
+        document.getElementById('extra-discount').addEventListener('input', updateSummaryTable);
+        document.getElementById('vat-percentage').addEventListener('input', updateSummaryTable);
+        document.getElementById('save-pdf').addEventListener('click', function () {
+            const element = document.querySelector('.confirmation-container');
+            if (!element) {
+                alert('The element with class "confirmation-container" was not found.');
+                return;
+            }
+            const opt = {
+                filename: 'order_confirmation.pdf',
+                margin: 10,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+    
+            html2pdf().from(element).set(opt).save();
+        });
+    </script>
+    
+</body>
+</html>

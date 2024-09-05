@@ -1,0 +1,330 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #fff;
+}
+
+.container {
+    max-width: 1800px;
+    margin: auto;
+    padding: 20px;
+}
+
+.container2 {
+    max-width: 1800px;
+    margin: auto;
+    padding: 20px;
+}
+
+.link{
+    color: #808080;
+    text-decoration: none;
+}
+
+.header {
+    background-color: #f2f2f2;
+    display: flex;
+    align-items: left;
+    border-bottom: 2px solid #A9A9A9;
+    padding-bottom: 0px;
+    margin-bottom: 20px;
+}
+
+.header2 {
+    background-color: #f2f2f2;
+    display: flex;
+    align-items: left;
+    border-top: 2px solid #A9A9A9;
+    padding-bottom: 0px;
+    margin-top: -20px;
+}
+
+.logo img {
+    width: 40px;
+    margin-top: 20px;
+    margin-left: 5px;
+}
+
+.logo2 img {
+    width: 280px;
+    margin-top: 20px;
+    margin-left: 5px;
+    text-align: left;
+}
+
+.company-info {
+    flex-grow: 0.2;
+    text-align: left;
+    padding: 10px;
+    margin: -5px;
+    font-family: "Times New Roman", Times, serif;
+    font-size: 14px;
+    font-weight: normal;
+}
+
+.company-info2{
+    color: rgb(136, 136, 136);
+    margin-top: -20px;
+    font-family: "Roboto", sans-serif;
+    font-size: 8px;
+}
+
+.order-info table {
+    width: 70%;
+    margin-top: 20px;
+}
+
+.order-info td {
+    padding: 4px;
+}
+
+/* ---------------------------- */
+.table {
+    border-collapse: collapse; /* Ensure borders do not overlap */
+    /* Remove border from table itself */
+}
+
+.td, th {
+    border: none; /* Remove borders from table cells */
+    padding: 8px; /* Optional: add some padding for spacing */
+    border: none;
+}
+
+textarea {
+    width: 200px; /* Set a specific width */
+    height: 15px; /* Set a specific height */
+    resize: both; /* Allow resizing both horizontally and vertically; use 'none' to disable resizing */
+}
+
+
+td:nth-child(1), th:nth-child(1) { /* Adjust width for the first column */
+    width: 1%; /* Example width */
+}
+
+td:nth-child(2), th:nth-child(2) { /* Adjust width for the second column */
+    width: 1%; /* Example width */
+}
+
+td:nth-child(3), th:nth-child(3) { /* Adjust width for the third column */
+    width: 10%; /* Example width */
+}
+
+td:nth-child(4), th:nth-child(4) { /* Adjust width for the third column */
+    width: 1%; /* Example width */
+}
+
+td:nth-child(5), th:nth-child(5) { /* Adjust width for the third column */
+    width: 10%; /* Example width */
+}
+
+td:nth-child(6), th:nth-child(6) { /* Adjust width for the third column */
+    width: 6%; /* Example width */
+}
+
+td:nth-child(7), th:nth-child(7) { /* Adjust width for the third column */
+    width: 15%; /* Example width */
+}
+
+td:nth-child(8), th:nth-child(8) { /* Adjust width for the third column */
+    width: 1%; /* Example width */
+}
+
+td:nth-child(9), th:nth-child(9) { /* Adjust width for the third column */
+    width: 1%; /* Example width */
+}
+
+td:nth-child(10), th:nth-child(10) { /* Adjust width for the third column */
+    width: 10%; /* Example width */
+}
+
+td:nth-child(11), th:nth-child(11) { /* Adjust width for the third column */
+    width: 44%; /* Example width */
+}
+
+
+        /* Specific styles for the rows if needed */
+.clickable-row {
+    border: none; /* Ensure no border on this row */
+}
+
+.extra-options {
+    border: none; /* Ensure no border on this row */
+}
+
+/* Optional: Style for input and select elements */
+.input[type="number"], input[type="checkbox"], select, textarea {
+    border: none; /* Remove default borders */
+    padding: 4px; /* Add padding for better appearance */
+}
+.textarea {
+    border: none; /* Remove default border */
+    padding: 4px; /* Add padding for better appearance */
+    width: 100%; /* Make textarea span full width */
+    box-sizing: border-box; /* Include padding in width */
+    resize: vertical; /* Allow vertical resizing */
+}
+
+.checkbox-cell {
+    text-align: center; /* Center horizontally */
+}
+
+.no-border-input {
+    border: none; /* Remove default borders */
+    background-color: #FFF; /* Optional: background color */
+    width: 100%; /* Optional: make inputs span the full width of the cell */
+    box-sizing: border-box; /* Ensure padding and border are included in the width */
+    text-align: center; /* Center align the text */
+}
+
+/* ---------------------------- */
+.order-info input[type="text"], 
+.order-info input[type="date"]{
+    background-color: #f2f2f2;
+    width: 100%; /* Optional: make inputs span the full width of the cell */
+    box-sizing: border-box; /* Ensure padding and border are included in the width */
+    min-width: 150px; /* Ensure columns are wide enough */
+    padding: 5px; /* Add padding for spacing */
+    border: 0px solid #ddd; /* Optional: Add border to cells */
+    vertical-align: middle; /* Center align content vertically */
+    border-bottom: 1px solid #000;
+    margin: 0px;
+}
+
+.order-info td {
+    padding: 5px;
+    white-space: nowrap; /* Prevents the text from wrapping to the next line */
+    vertical-align: middle; /* Align text vertically in the middle */
+}
+
+.order-info {
+    display: table;
+    width: auto;
+    margin-right: 10px;
+    margin-left: 150px;
+}
+
+.order-info input[type="number"], 
+.order-info textarea {
+    border: none; /* No underline for number inputs and textareas */
+    background-color: #FFF;
+    width: 100%; /* Optional: make inputs and textarea span the full width of the cell */
+    box-sizing: border-box; /* Ensure padding and border are included in the width */
+}
+
+.order-table {
+    width: 100%;
+}
+
+.order-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.order-table th, .order-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.order-table th {
+    background-color: #D3D3D3;
+}
+
+.clickable-row {
+    cursor: pointer;
+}
+
+.extra-options {
+    display: none;
+    background-color: #fff;
+    border-top: 1px solid #fff;
+}
+
+.options-section {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.options-section div {
+    flex: 1;
+    padding: 10px;
+}
+
+.size-options input[type="radio"], .color-options input[type="radio"], .frame-options input[type="radio"], .grille-options input[type="radio"], .glass-options input[type="radio"] {
+    margin: 10px;
+
+}
+
+.size-options, .color-options, .operating-types, .frame-options, .grille-options, .glass-options {
+    padding: 1px;
+    border: 1px solid #ccc;
+
+}
+
+.operating-options {
+    display: flex; /* Ensure flex display for children */
+}
+
+.operating-left, .operating-right {
+    flex: 1;
+}
+
+.signature-note {
+    text-align: left; /* Center align the text */
+    margin: 5px; /* Add some space above and below the text */
+    font-weight: bold; /* Make the text bold */
+    font-size: 15px; /* Adjust the font size as needed */
+    color: #000; /* Change color if needed */
+    padding-left: 100px;
+    margin-left: 150px;
+}
+
+.signature-field {
+    background-color: #f2f2f2; /* Set background color */
+    border: none; /* Remove border */
+    border-bottom: 1px solid #000; /* Add underline */
+    min-width: 51%; /* Make input span full width */
+    box-sizing: border-box; /* Include padding and border in element's width */
+    margin: 5px;
+
+}
+
+.underline {
+    color: #808080;
+    font-style: italic;
+    font-weight: 10;
+    margin-bottom: -50px;
+    margin-left: 3px;
+    font-size: 80%;
+    margin: 2px;
+    line-height: 0;
+}
+
+.name_underline {
+    color: #000000;
+    font-weight: 50;
+}
+
+.info {
+        text-align: left; /* Center align the text */
+    margin: 10px 5; /* Add some space above and below the text */
+    margin-left: 50px;
+    font-weight: bold; /* Make the text bold */
+    font-size: 20px; /* Adjust the font size as needed */
+    color: #000; /* Change color if needed */
+}
+
+.black-text {
+    color: #000000; /* Black color for the text before the colon */
+    font-weight: 50; /* Optional: Make the text bold */
+    font-style: italic;
+}
+
+.gray-text {
+    color: #808080; /* Gray color for the text after the colon */
+    font-weight: 50;
+    font-style: italic;
+}
+
+.notes {
+    width: 100%;
+    border: none;
+}

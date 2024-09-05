@@ -1,0 +1,77 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+.container {
+    width: 100%; /* Ensure container takes full width available */
+    max-width: 1500px; /* Limit maximum width to keep layout manageable */
+    margin: 20px auto;
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box; /* Ensure padding and border are included in the width */
+    overflow-x: auto; /* Allow horizontal scrolling if needed */
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.company-info {
+    text-align: left;
+    margin-top: 10px;
+    font-size: 14px;
+    max-width: 70%; /* Adjust the width to make room for the image */
+}
+
+header img {
+    max-width: 150px; /* Adjust the max-width of the image */
+    height: auto;
+}
+
+.order-info {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.order-table table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.order-table th, .order-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+.order-table th {
+    background-color: #f4f4f4;
+}
+
+.clickable-row {
+    cursor: pointer;
+    background-color: #f9f9f9;
+}
+
+.expandable-row {
+    background-color: #f1f1f1;
+}
+
+.extra-options {
+    padding: 10px;
+    font-size: 14px;
+}
+
+footer {
+    margin-top: 20px;
+    font-size: 14px;
+}

@@ -1,0 +1,1540 @@
+{% load static %}
+<form id="orderForm" method="post" action="{% url 'order_view' %}">
+    {% csrf_token %}
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Window Order Form</title>
+        <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}?v=1.2">
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Function to save form data to sessionStorage
+                function saveFormData() {
+                    const formData = {
+                        name: document.getElementById('name').value,
+                        contact_phone: document.getElementById('contactphone').value,
+                        job_name: document.getElementsByName('job_name')[0].value,
+                        email: document.getElementById('email').value,
+                        date: document.getElementById('date').value,
+                        ordered_by: document.getElementsByName('ordered_by')[0].value,
+                        ship_to: document.getElementsByName('ship_to')[0].value,
+                        address: document.getElementsByName('address')[0].value,
+                        QO: document.querySelector('input[name="QO"]:checked') ? document.querySelector('input[name="QO"]:checked').value : '',
+                        signature: document.getElementById('submitted_by').value
+                    };
+                    sessionStorage.setItem('formData', JSON.stringify(formData));
+                }
+
+                // Function to restore form data from sessionStorage
+                function restoreFormData() {
+                    const savedData = JSON.parse(sessionStorage.getItem('formData'));
+                    if (savedData) {
+                        document.getElementById('name').value = savedData.name;
+                        document.getElementById('contactphone').value = savedData.contact_phone;
+                        document.getElementsByName('job_name')[0].value = savedData.job_name;
+                        document.getElementById('email').value = savedData.email;
+                        document.getElementById('date').value = savedData.date;
+                        document.getElementsByName('ordered_by')[0].value = savedData.ordered_by;
+                        document.getElementsByName('ship_to')[0].value = savedData.ship_to;
+                        document.getElementsByName('address')[0].value = savedData.address;
+                        if (savedData.QO) {
+                            document.querySelector(`input[name="QO"][value="${savedData.QO}"]`).checked = true;
+                        }
+                        document.getElementById('submitted_by').value = savedData.signature;
+                    }
+                }
+
+                // Save form data on form submit
+                document.getElementById('orderForm').addEventListener('submit', function(event) {
+                    // Save form data to sessionStorage
+                    saveFormData();
+
+                    // Validation for the date input
+                    let dateInput = document.getElementById('date');
+                    if (!dateInput.value) {
+                        let today = new Date();
+                        let yyyy = today.getFullYear();
+                        let mm = String(today.getMonth() + 1).padStart(2, '0');
+                        let dd = String(today.getDate()).padStart(2, '0');
+                        let formattedDate = `${yyyy}-${mm}-${dd}`;
+                        dateInput.value = formattedDate;
+                    }
+
+                    // Validation for the radio buttons
+                    let quoteRadio = document.querySelector('input[name="QO"]:checked');
+                    if (!quoteRadio) {
+                        alert('Please select either QUOTE or ORDER before submitting.');
+                        event.preventDefault(); // Prevent form submission
+                    }
+                });
+
+                // Restore form data on page load
+                restoreFormData();
+            });
+        </script>
+        <style>
+
+            .order-table th, .order-table td {
+                border: 1px solid #ddd;
+                padding: 8px;
+            }
+
+            .order-table th {
+                background-color: rgb(246, 246, 246);
+            }
+
+            .name_underline {
+                font-family: "Roboto", sans-serif;
+                display: inline-block;
+                border-bottom: 2px solid #A9A9A9; /* Underline color */
+                padding-bottom: 2px; /* Adjust padding to control space between text and underline */
+            }
+
+            .name_underline::after {
+                content: ' '; /* Creates an empty content after the text */
+                position: absolute; /* Position it absolutely within the parent */
+                left: 100%; /* Position it right after the text */
+                bottom: 0; /* Align it to the bottom of the parent element */
+                width: 20px; /* Adjust this width as needed to match the desired underline length */
+                border-bottom: 2px solid #A9A9A9; /* Create the underline */
+            }
+
+            input[type="radio"],
+            input[type="checkbox"] {
+                appearance: none; /* Remove default styling */
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                width: 14px; /* Width of the radio button */
+                height: 14px; /* Height of the radio button */
+                border: 2px solid #808080; /* Border color and size */
+                margin-right: 5px; /* Space between radio button and label */
+                cursor: pointer; /* Change cursor to pointer */
+                outline: none; /* Remove default focus outline */
+                position: relative;
+                vertical-align: middle; /* Align the radio button vertically with the text */
+                margin-top: -2px;
+            }
+
+            /* Style for the radio button when checked */
+            input[type="radio"]:checked::before,
+            input[type="checkbox"]:checked::before {
+                content: "";
+                display: block;
+                width: 100%; /* Fill the entire width of the button */
+                height: 100%; /* Fill the entire height of the button */
+                background-color: #808080; /* Color to fill when checked */
+                position: absolute;
+                top: 0; /* Start filling from the top */
+                left: 0; /* Start filling from the left */
+            }
+
+            .company-info2 {
+                color: rgb(136, 136, 136);
+                margin-top: -35px;
+                font-family: "Roboto", sans-serif;
+                font-size: 18px;
+            }
+        
+            .logo img {
+                width: 40px;
+                margin-top: 20px;
+                margin-left: 45px; /* Moves the logo 40px to the right */
+            }
+        
+            .options-section {
+                display: flex;
+                align-items: center;
+                margin-left: 40px; /* Moves the title and description 40px after the logo */
+            }
+        
+            .company-info {
+                margin-left: -20px; /* Adds space between logo and title */
+            }
+
+            td {
+                padding: 3px;
+            }
+
+            .order-table {
+                width: 100%;
+                font-weight: normal;
+            }
+
+            .header {
+                background-color: rgb(220, 220, 220);
+                display: flex;
+                align-items: left;
+                border-bottom: none;
+                padding-bottom: 0px;
+                margin-bottom: 20px;
+            }
+            .options-section {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 20px;
+                border: none;
+            }
+
+            .options-section {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: flex-start; /* Align items to the top */
+                gap: 20px; /* Optional: Adds space between each section */
+                border: none;
+            }
+
+            .options-section > div {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start; /* Align each label and input to the start */
+                border: none;
+            }
+
+            .options-section p {
+                margin: 0;
+                padding-bottom: 5px; /* Space between title and first option */
+                font-weight: normal;
+                border: none;
+            }
+
+            .extra-options {
+                font-weight: normal;
+            }
+
+
+            .option-title {
+                padding: 5px; /* Add some padding around the text */
+                margin-bottom: 10px; /* Add some space below the title */
+                text-align: center; /* Center the text */
+            }
+
+
+
+
+
+
+            
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <div class="logo">
+                    <img src="{% static 'images/Icon.png' %}" alt="Shems Homes Logo">
+                </div>
+                <div class="options-section">
+                    <div class="company-info">
+                        <h1 id="formTitle" style='font-family: "Times New Roman", Times, serif; font-weight: normal;'>WINDOW FORM</h1>
+                        <div class="company-info2">
+                            <p>Shems Homes, Inc.<br>
+                            Architectural Home Plans Sales Company<br>
+                            P.O. Box 17653 South Lake Tahoe, CA 96151<br>
+                            Office (888) 960-5263<br>
+                            <a href="http://www.shemshomes.com" class="link">www.shemshomes.com</a></p>
+                        </div>
+                    </div>
+                    <div class="order-info">
+                        <table style="border-collapse: collapse; width: 100%;">
+                            <tr>
+                                <td style="padding: 1px; vertical-align: middle; font-family: 'Roboto', sans-serif;">Account Name:</td>
+                                <td style="padding: 1px; vertical-align: middle; color: #dcdcdc;">
+                                    <input type="text" id="name" name="name" style="width: 100%; box-sizing: border-box; background-color: #dcdcdc; border: none; border-bottom: 1px solid #A9A9A9;">
+                                </td>
+                                <td style="padding: 1px; vertical-align: middle;">Contact Phone:</td>
+                                <td style="padding: 1px; vertical-align: middle;">
+                                    <input type="text" id="contactphone" name="contact_phone" style="width: 100%; box-sizing: border-box; background-color: #dcdcdc; border: none; border-bottom: 1px solid #A9A9A9;">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 1px; vertical-align: middle;">Job Name/PO:</td>
+                                <td style="padding: 1px; vertical-align: middle;">
+                                    <input type="text" name="job_name" style="width: 100%; box-sizing: border-box; background-color: #dcdcdc; border: none; border-bottom: 1px solid #A9A9A9;">
+                                </td>
+                                <td style="padding: 1px; vertical-align: middle;">Contact Email:</td>
+                                <td style="padding: 1px; vertical-align: middle;">
+                                    <input type="text" id="email" name="email" style="width: 100%; box-sizing: border-box; background-color: #dcdcdc; border: none; border-bottom: 1px solid #A9A9A9;">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 1px; vertical-align: middle;">Date:</td>
+                                <td style="padding: 1px; vertical-align: middle;">
+                                    <input type="date" id="date" name="date" style="width: 100%; box-sizing: border-box; background-color: #dcdcdc; border: none; border-bottom: 1px solid #A9A9A9;">
+                                </td>
+                                <td style="padding: 1px; vertical-align: middle;">Ship To:</td>
+                                <td style="padding: 1px; vertical-align: middle;">
+                                    <input type="text" name="ship_to" style="width: 100%; box-sizing: border-box; background-color: #dcdcdc; border: none; border-bottom: 1px solid #A9A9A9;">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 1px; vertical-align: middle;">Ordered By:</td>
+                                <td style="padding: 1px; vertical-align: middle;">
+                                    <input type="text" name="ordered_by" style="width: 100%; box-sizing: border-box; background-color: #dcdcdc; border: none; border-bottom: 1px solid #A9A9A9;">
+                                </td>
+                                <td style="padding: 1px; vertical-align: middle;">Address:</td>
+                                <td style="padding: 1px; vertical-align: middle;">
+                                    <input type="text" name="address" style="width: 100%; box-sizing: border-box; background-color: #dcdcdc; border: none; border-bottom: 1px solid #A9A9A9;">
+                                </td>
+                            </tr>
+                        </table>
+                        
+                        
+                    </div>
+                    <div class="signature-note">
+                        <p style="font-weight: normal;">ALL ORDERS REQUIRE SIGNATURE BELOW:</p>
+                        <p style="font-weight: normal; cursor: pointer; outline: none;">
+                            <input type="radio" name="QO" value="quote" id="quoteRadio">
+                            <label for="quoteRadio">QUOTE</label>
+                            
+                            <input type="radio" name="QO" value="order" id="orderRadio" style="margin-left: 40;">
+                            <label for="orderRadio" >ORDER</label>
+                        </p>
+                        <p style="display: flex; align-items: center; width: 90%;">
+                            <input type="text" placeholder="X" id="submitted_by" name="signature" class="signature-field" style="margin-right: 1%; border-bottom: 2px solid #A9A9A9; flex-grow: 1; background-color: rgb(220, 220, 220);">
+                            <button type="submit"> Submit</button>
+                            <!--style="flex-shrink: 0; border: none; border-bottom: 2px solid #A9A9A9; z-index: 1; background-color: rgb(220, 220, 220); margin-left: -5px;"-->
+                        </p>
+                        <p class="underline" style='font-family: "Times New Roman", Times, serif;'>I have reviewed this order and certify that it is correct, as documented</p><br>
+                        <p class="underline" style='font-family: "Times New Roman", Times, serif;'>on this order form. By signing below, I acknowledge that this order is</p><br>
+                        <p class="underline" style='font-family: "Times New Roman", Times, serif;'>to be released into production. I understand that this order is non-</p><br>
+                        <p class="underline" style='font-family: "Times New Roman", Times, serif;'>cancellable, non-returnable, and non-refundable.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="order-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="font-weight: normal">#</th>
+                            <th style="font-weight: normal">QTY</th>
+                            <th style="font-weight: normal">Width</th>
+                            <th style="font-weight: normal">X</th>
+                            <th style="font-weight: normal">Height</th>
+                            <th style="font-weight: normal">Temp GL</th>
+                            <th style="font-weight: normal">Window Types</th>
+                            <th style="font-weight: normal">LH</th>
+                            <th style="font-weight: normal">RH</th>
+                            <th style="font-weight: normal">Build-N Blinds</th>
+                            <th style="font-weight: normal">Notes/Other Info</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                <!-- Row 1 -->
+
+                <tr class="clickable-row">
+                    <td>1</td>
+                    <td><input type="number" class="no-border-input" id="quantity1" name="quantity1" step="any"></td>
+                    <td><input type="number" class="no-border-input" id="width1" name="width1" step="any"></td>
+                    <td>X</td>
+                    <td><input type="number" class="no-border-input" id="height1" name="height1" step="any"></td>
+                    <td><input type="checkbox" class="no-border-input" id="tempgl1" name="tempgl1" style="margin-left: 35px;"></td>
+                    <td>
+                        <select name="window_type1" class="no-border-input">
+                            <option value="none">-- none --</option>
+                            <option value="xo_ox">XO or OX - 2 Lite Slider X is Active</option>
+                            <option value="xox">XOX - 3 Lite Slider X is Active</option>
+                            <option value="csmt">CSMT - Casement</option>
+                            <option value="sh">SH - Single Hung</option>
+                            <option value="pd">PD - Patio Door</option>
+                            <option value="dh">DH - Double Hung</option>
+                            <option value="xx">XX - 2 Lite (X Active)</option>
+                            <option value="pw">PW - Picture Window</option>
+                            <option value="awn">AWN - Awning</option>
+                            <option value="fr">FR - Swing Door</option>
+                            <option value="bf">BF - Bifold Window</option>
+                            <option value="tt">TT - Tilt and Turn</option>
+                            <option value="bw">BW - Bay Window</option>
+                            <option value="fw">FW - Folding Window</option>
+                        </select>
+                    </td>
+                    <td><input type="radio" name="h1" value="lh"></td>
+                    <td><input type="radio" name="h1" value="rh"></td>
+                    <td class="checkbox-cell"><input type="checkbox" id="bnb1" name="bnb1"></td>
+                    <td><input type="text" class="notes" name="notes1"></textarea></td>
+                </tr>
+                <tr class="extra-options">
+                    <td colspan="11">
+                        <div class="options-section">
+
+                            <div class="size-options">
+                                <p class="option-title"><strong style="font-weight: normal;">Size Options</strong></p>
+                                <label><input type="radio" name="Size_Options1" value="NES">Net/Exact Size</label><br>
+                                <label><input type="radio" name="Size_Options1" value="RO">Rough Opening</label>
+                            </div>
+                            <div class="color-options">
+                                <p class="option-title"><strong style="font-weight: normal;">Color Options</strong></p>
+                                <label><input type="radio" name="color1" value="MB"> Matt Black</label><br>
+                                <label><input type="radio" name="color1" value="MC"> Matt Chocolate</label><br>
+                                <label><input type="radio" name="color1" value="MDG"> Matt Dark Grey</label><br>
+                                <label><input type="radio" name="color1" value="MLG"> Matt Light Grey</label><br>
+                                <label><input type="radio" name="color1" value="CG"> Champagne</label><br>
+                                <label><input type="radio" name="color1" value="PW"> Pure White</label><br>
+                                <label><input type="radio" name="color1" value="YW"> Yellow Wood</label><br>
+                                <label><input type="radio" name="color1" value="GO"> Golden Oak</label><br>
+                                <label><input type="radio" name="color1" value="YR"> Yellow Rosewood</label><br>
+                                <label><input type="radio" name="color1" value="RS"> Red Sandalwood</label><br>
+                                <label><input type="radio" name="color1" value="C"> Custom</label>
+                            </div>
+                            <div class="frame-options">
+                                <p class="option-title"><strong style="font-weight: normal;">Frame Options</strong></p>
+                                <label><input type="radio" name="Frame_Options1" value="NF">Nail Fin</label><br>
+                                <label><input type="radio" name="Frame_Options1" value="SR">Stucco/Retro</label><br>
+                                <label><input type="radio" name="Frame_Options1" value="B">Block</label>
+                            </div>
+                            <div class="grille-options">
+                                <p class="option-title"><strong style="font-weight: normal;">Grille Options</strong></p>
+                                <label><input type="radio" name="Grille_Options1" value="no">NA</label><br>
+                                <label><input type="radio" name="Grille_Options1" value="yes">YES</label>
+                            </div>
+                            <div class="glass-options">
+                                <p class="option-title"><strong style="font-weight: normal;">Glass Options</strong></p>
+                                <label><input type="checkbox" name="LE1" value="on">Low-E</label><br>
+                                <label><input type="checkbox" name="GT1" value="on">Grey Tinted</label><br>
+                                <label><input type="checkbox" name="GR1" value="on">Grey Reflective</label><br>
+                                <label><input type="checkbox" name="B1" value="on">Blue</label>
+                            </div>
+                            <div class="operating-types">
+                                <p class="option-title"><strong style="font-weight: normal;">Window Operating Types</strong></p>
+                                <div class="operating-options">
+                                    <div class="operating-left">
+                                        <p>XO or OX - 2 Lite Slider X is Active</p>
+                                        <p>XOX - 3 Lite Slider X is Active</p>
+                                        <p>CSMT - Casement</p>
+                                        <p>SH - Single Hung</p>
+                                        <p>PD - Patio Door</p>
+                                        <p>DH - Double Hung</p>
+                                        <p>XX - 2 Lite (X Active)</p>
+                                    </div>
+                                    <div class="operating-right">
+                                        <p>PW - Picture Window</p>
+                                        <p>AWN - Awning</p>
+                                        <p>FR - Swing Door</p>
+                                        <p>BF - Bifold Window</p>
+                                        <p>TT - Tilt and Turn</p>
+                                        <p>BW - Bay Window</p>
+                                        <p>FW - Folding Window</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                            <!-- Additional rows -->
+                            <!-- Repeat the structure for each new row -->
+
+                            <!-- Row 2 -->
+                            <tr class="clickable-row">
+                                <td>2</td>
+                                <td><input type="number" class="no-border-input" id="quantity2" name="quantity2" step="any"></td>
+                                <td><input type="number" class="no-border-input" id="width2" name="width2" step="any"></td>
+                                <td>X</td>
+                                <td><input type="number" class="no-border-input" id="height2" name="height2" step="any"></td>
+                                <td><input type="checkbox" class="no-border-input" id="tempgl2" name="tempgl2" style="margin-left: 35px;"></td>
+                                <td>
+                                    <select name="window_type2" class="no-border-input">
+                                        <option value="none">-- none --</option>
+                                        <option value="xo_ox">XO or OX - 2 Lite Slider X is Active</option>
+                                        <option value="xox">XOX - 3 Lite Slider X is Active</option>
+                                        <option value="csmt">CSMT - Casement</option>
+                                        <option value="sh">SH - Single Hung</option>
+                                        <option value="pd">PD - Patio Door</option>
+                                        <option value="dh">DH - Double Hung</option>
+                                        <option value="xx">XX - 2 Lite (X Active)</option>
+                                        <option value="pw">PW - Picture Window</option>
+                                        <option value="awn">AWN - Awning</option>
+                                        <option value="fr">FR - Swing Door</option>
+                                        <option value="bf">BF - Bifold Window</option>
+                                        <option value="tt">TT - Tilt and Turn</option>
+                                        <option value="bw">BW - Bay Window</option>
+                                        <option value="fw">FW - Folding Window</option>
+                                    </select>
+                                </td>
+                                <td><input type="radio" name="h2" value="lh"></td>
+                                <td><input type="radio" name="h2" value="rh"></td>
+                                <td class="checkbox-cell"><input type="checkbox" id="bnb2" name="bnb2"></td>
+                                <td><input type="text" class="notes" name="notes2"></textarea></td>
+                            </tr>
+                            <tr class="extra-options">
+                                <td colspan="11">
+                                    <div class="options-section">
+                                        <div class="size-options">
+                                            <p><strong style="font-weight: normal;">Size Options</strong></p>
+                                            <label><input type="radio" name="Size_Options2" value="NES">Net/Exact Size</label><br>
+                                            <label><input type="radio" name="Size_Options2" value="RO">Rough Opening</label>
+                                        </div>
+                                        <div class="color-options">
+                                            <p><strong style="font-weight: normal;">Color Options</strong></p>
+                                            <label><input type="radio" name="color2" value="MB">  Matt Black</label><br>
+                                            <label><input type="radio" name="color2" value="MC">  Matt Chocolate</label><br>
+                                            <label><input type="radio" name="color2" value="MDG"> Matt Dark Grey</label><br>
+                                            <label><input type="radio" name="color2" value="MLG"> Matt Light Grey</label><br>
+                                            <label><input type="radio" name="color2" value="CG">  Champagne</label><br>
+                                            <label><input type="radio" name="color2" value="PW">  Pure White</label><br>
+                                            <label><input type="radio" name="color2" value="YW">  Yellow Wood</label><br>
+                                            <label><input type="radio" name="color2" value="GO">  Golden Oak</label><br>
+                                            <label><input type="radio" name="color2" value="YR">  Yellow Rosewood</label><br>
+                                            <label><input type="radio" name="color2" value="RS">  Red Sandalwood</label><br>
+                                            <label><input type="radio" name="color2" value="C">   Custom</label>
+                                        </div>
+                                        <div class="frame-options">
+                                            <p><strong style="font-weight: normal;">Frame Options</strong></p>
+                                            <label><input type="radio" name="Frame_Options2" value="NF">Nail Fin</label><br>
+                                            <label><input type="radio" name="Frame_Options2" value="SR">Stucco/Retro</label><br>
+                                            <label><input type="radio" name="Frame_Options2" value="B">>Block</label>
+                                        </div>
+                                        <div class="grille-options">
+                                            <p><strong style="font-weight: normal;">Grille Options</strong></p>
+                                            <label><input type="radio" name="Grille_Options2" value="no">NA</label><br>
+                                            <label><input type="radio" name="Grille_Options2" value="yes">YES</label>
+                                        </div>
+                                        <div class="glass-options">
+                                            <p><strong style="font-weight: normal;">Glass Options</strong></p>
+                                            <label><input type="checkbox" name="LE2" value="on">Low-E</label><br>
+                                            <label><input type="checkbox" name="GT2" value="on">Grey Tinted</label><br>
+                                            <label><input type="checkbox" name="GR2" value="on">Grey Reflective</label><br>
+                                            <label><input type="checkbox" name="B2" value="on">Blue</label>
+                                        </div>
+                                        <div class="operating-types">
+                                            <p><strong style="font-weight: normal;">Window Operating Types</strong></p>
+                                            <div class="operating-options">
+                                                <div class="operating-left">
+                                                    <p>XO or OX - 2 Lite Slider X is Active</p>
+                                                    <p>XOX - 3 Lite Slider X is Active</p>
+                                                    <p>CSMT - Casement</p>
+                                                    <p>SH - Single Hung</p>
+                                                    <p>PD - Patio Door</p>
+                                                    <p>DH - Double Hung</p>
+                                                    <p>XX - 2 Lite (X Active)</p>
+                                                </div>
+                                                <div class="operating-right">
+                                                    <p>PW - Picture Window</p>
+                                                    <p>AWN - Awning</p>
+                                                    <p>FR - Swing Door</p>
+                                                    <p>BF - Bifold Window</p>
+                                                    <p>TT - Tilt and Turn</p>
+                                                    <p>BW - Bay Window</p>
+                                                    <p>FW - Folding Window</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Row 3 -->
+                            <tr class="clickable-row">
+                                <td>3</td>
+                                <td><input type="number" class="no-border-input" id="quantity3" name="quantity3" step="any"></td>
+                                <td><input type="number" class="no-border-input" id="width3" name="width3" step="any"></td>
+                                <td>X</td>
+                                <td><input type="number" class="no-border-input" id="height3" name="height3" step="any"></td>
+                                <td><input type="checkbox" class="no-border-input" id="tempgl3" name="tempgl3" style="margin-left: 35px;"></td>
+                                <td>
+                                    <select name="window_type3" class="no-border-input">
+                                        <option value="none">-- none -- </option>
+                                        <option value="xo_ox">XO or OX - 2 Lite Slider X is Active</option>
+                                        <option value="xox">XOX - 3 Lite Slider X is Active</option>
+                                        <option value="csmt">CSMT - Casement</option>
+                                        <option value="sh">SH - Single Hung</option>
+                                        <option value="pd">PD - Patio Door</option>
+                                        <option value="dh">DH - Double Hung</option>
+                                        <option value="xx">XX - 2 Lite (X Active)</option>
+                                        <option value="pw">PW - Picture Window</option>
+                                        <option value="awn">AWN - Awning</option>
+                                        <option value="fr">FR - Swing Door</option>
+                                        <option value="bf">BF - Bifold Window</option>
+                                        <option value="tt">TT - Tilt and Turn</option>
+                                        <option value="bw">BW - Bay Window</option>
+                                        <option value="fw">FW - Folding Window</option>
+                                    </select>
+                                </td>
+                                <td><input type="radio" name="h3" value="lh"></td>
+                                <td><input type="radio" name="h3" value="rh"></td>
+                                <td class="checkbox-cell"><input type="checkbox" id="bnb3" name="bnb3"></td>
+                                <td><input type="text" class="notes" name="notes3"></textarea></td>
+                            </tr>
+                            <tr class="extra-options">
+                                <td colspan="11">
+                                    <div class="options-section">
+                                        <div class="size-options">
+                                            <p><strong style="font-weight: normal;">Size Options</strong></p>
+                                            <label><input type="radio" name="Size_Options3" value="NES">Net/Exact Size</label><br>
+                                            <label><input type="radio" name="Size_Options3" value="RO">Rough Opening</label>
+                                        </div>
+                                        <div class="color-options">
+                                            <p><strong style="font-weight: normal;">Color Options</strong></p>
+                                            <label><input type="radio" name="color3" value="MB"> Matt Black</label><br>
+                                            <label><input type="radio" name="color3" value="MC"> Matt Chocolate</label><br>
+                                            <label><input type="radio" name="color3" value="MDG"> Matt Dark Grey</label><br>
+                                            <label><input type="radio" name="color3" value="MLG"> Matt Light Grey</label><br>
+                                            <label><input type="radio" name="color3" value="CG"> Champagne</label><br>
+                                            <label><input type="radio" name="color3" value="PW"> Pure White</label><br>
+                                            <label><input type="radio" name="color3" value="YW"> Yellow Wood</label><br>
+                                            <label><input type="radio" name="color3" value="GO"> Golden Oak</label><br>
+                                            <label><input type="radio" name="color3" value="YR"> Yellow Rosewood</label><br>
+                                            <label><input type="radio" name="color3" value="RS"> Red Sandalwood</label><br>
+                                            <label><input type="radio" name="color3" value="C"> Custom</label>
+                                        </div>
+                                        <div class="frame-options">
+                                            <p><strong style="font-weight: normal;">Frame Options</strong></p>
+                                            <label><input type="radio" name="Frame_Options3" value="NF">Nail Fin</label><br>
+                                            <label><input type="radio" name="Frame_Options3" value="SR">Stucco/Retro</label><br>
+                                            <label><input type="radio" name="Frame_Options3" value="B">Block</label>
+                                        </div>
+                                        <div class="grille-options">
+                                            <p><strong style="font-weight: normal;">Grille Options</strong></p>
+                                            <label><input type="radio" name="Grille_Options3" value="no">NA</label><br>
+                                            <label><input type="radio" name="Grille_Options3" value="yes">YES</label>
+                                        </div>
+                                        <div class="glass-options">
+                                            <p><strong style="font-weight: normal;">Glass Options</strong></p>
+                                            <label><input type="checkbox" name="LE3" value="on">Low-E</label><br>
+                                            <label><input type="checkbox" name="GT3" value="on">Grey Tinted</label><br>
+                                            <label><input type="checkbox" name="GR3" value="on">Grey Reflective</label><br>
+                                            <label><input type="checkbox" name="B3" value="on">Blue</label>
+                                        </div>
+                                        <div class="operating-types">
+                                            <p><strong style="font-weight: normal;">Window Operating Types</strong></p>
+                                            <div class="operating-options">
+                                                <div class="operating-left">
+                                                    <p>XO or OX - 2 Lite Slider X is Active</p>
+                                                    <p>XOX - 3 Lite Slider X is Active</p>
+                                                    <p>CSMT - Casement</p>
+                                                    <p>SH - Single Hung</p>
+                                                    <p>PD - Patio Door</p>
+                                                    <p>DH - Double Hung</p>
+                                                    <p>XX - 2 Lite (X Active)</p>
+                                                </div>
+                                                <div class="operating-right">
+                                                    <p>PW - Picture Window</p>
+                                                    <p>AWN - Awning</p>
+                                                    <p>FR - Swing Door</p>
+                                                    <p>BF - Bifold Window</p>
+                                                    <p>TT - Tilt and Turn</p>
+                                                    <p>BW - Bay Window</p>
+                                                    <p>FW - Folding Window</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Row 4 -->
+                            <tr class="clickable-row">
+                                <td>4</td>
+                                <td><input type="number" class="no-border-input" id="quantity4" name="quantity4" step="any"></td>
+                                <td><input type="number" class="no-border-input" id="width4" name="width4" step="any"></td>
+                                <td>X</td>
+                                <td><input type="number" class="no-border-input" id="height4" name="height4" step="any"></td>
+                                <td><input type="checkbox" class="no-border-input" id="tempgl4" name="tempgl4" style="margin-left: 35px;"></td>
+                                <td>
+                                    <select name="window_type4" class="no-border-input">
+                                        <option value="none">-- none --</option>
+                                        <option value="xo_ox">XO or OX - 2 Lite Slider X is Active</option>
+                                        <option value="xox">XOX - 3 Lite Slider X is Active</option>
+                                        <option value="csmt">CSMT - Casement</option>
+                                        <option value="sh">SH - Single Hung</option>
+                                        <option value="pd">PD - Patio Door</option>
+                                        <option value="dh">DH - Double Hung</option>
+                                        <option value="xx">XX - 2 Lite (X Active)</option>
+                                        <option value="pw">PW - Picture Window</option>
+                                        <option value="awn">AWN - Awning</option>
+                                        <option value="fr">FR - Swing Door</option>
+                                        <option value="bf">BF - Bifold Window</option>
+                                        <option value="tt">TT - Tilt and Turn</option>
+                                        <option value="bw">BW - Bay Window</option>
+                                        <option value="fw">FW - Folding Window</option>
+                                    </select>
+                                </td>
+                                <td><input type="radio" name="h4" value="lh"></td>
+                                <td><input type="radio" name="h4" value="rh"></td>
+                                <td class="checkbox-cell"><input type="checkbox" id="bnb4" name="bnb4"></td>
+                                <td><input type="text" class="notes" name="notes4"></textarea></td>
+                            </tr>
+                            <tr class="extra-options">
+                                <td colspan="11">
+                                    <div class="options-section">
+                                        <div class="size-options">
+                                            <p><strong style="font-weight: normal;">Size Options</strong></p>
+                                            <label><input type="radio" name="Size_Options4" value="NES">Net/Exact Size</label><br>
+                                            <label><input type="radio" name="Size_Options4" value="RO">Rough Opening</label>
+                                        </div>
+                                        <div class="color-options">
+                                            <p><strong style="font-weight: normal;">Color Options</strong></p>
+                                            <label><input type="radio" name="color4" value="MB"> Matt Black</label><br>
+                                            <label><input type="radio" name="color4" value="MC"> Matt Chocolate</label><br>
+                                            <label><input type="radio" name="color4" value="MDG"> Matt Dark Grey</label><br>
+                                            <label><input type="radio" name="color4" value="MLG"> Matt Light Grey</label><br>
+                                            <label><input type="radio" name="color4" value="CG"> Champagne</label><br>
+                                            <label><input type="radio" name="color4" value="PW"> Pure White</label><br>
+                                            <label><input type="radio" name="color4" value="YW"> Yellow Wood</label><br>
+                                            <label><input type="radio" name="color4" value="GO"> Golden Oak</label><br>
+                                            <label><input type="radio" name="color4" value="YR"> Yellow Rosewood</label><br>
+                                            <label><input type="radio" name="color4" value="RS"> Red Sandalwood</label><br>
+                                            <label><input type="radio" name="color4" value="C"> Custom</label>
+                                        </div>
+                                        <div class="frame-options">
+                                            <p><strong style="font-weight: normal;">Frame Options</strong></p>
+                                            <label><input type="radio" name="Frame_Options4" value="NF">Nail Fin</label><br>
+                                            <label><input type="radio" name="Frame_Options4" value="SR">Stucco/Retro</label><br>
+                                            <label><input type="radio" name="Frame_Options4" value="B">Block</label>
+                                        </div>
+                                        <div class="grille-options">
+                                            <p><strong style="font-weight: normal;">Grille Options</strong></p>
+                                            <label><input type="radio" name="Grille_Options4" value="no">NA</label><br>
+                                            <label><input type="radio" name="Grille_Options4" value="yes">YES</label>
+                                        </div>
+                                        <div class="glass-options">
+                                            <p><strong style="font-weight: normal;">Glass Options</strong></p>
+                                            <label><input type="checkbox" name="LE4" value="on">Low-E</label><br>
+                                            <label><input type="checkbox" name="GT4" value="on">Grey Tinted</label><br>
+                                            <label><input type="checkbox" name="GR4" value="on">Grey Reflective</label><br>
+                                            <label><input type="checkbox" name="B4" value="on">Blue</label>
+                                        </div>
+                                        <div class="operating-types">
+                                            <p><strong style="font-weight: normal;">Window Operating Types</strong></p>
+                                            <div class="operating-options">
+                                                <div class="operating-left">
+                                                    <p>XO or OX - 2 Lite Slider X is Active</p>
+                                                    <p>XOX - 3 Lite Slider X is Active</p>
+                                                    <p>CSMT - Casement</p>
+                                                    <p>SH - Single Hung</p>
+                                                    <p>PD - Patio Door</p>
+                                                    <p>DH - Double Hung</p>
+                                                    <p>XX - 2 Lite (X Active)</p>
+                                                </div>
+                                                <div class="operating-right">
+                                                    <p>PW - Picture Window</p>
+                                                    <p>AWN - Awning</p>
+                                                    <p>FR - Swing Door</p>
+                                                    <p>BF - Bifold Window</p>
+                                                    <p>TT - Tilt and Turn</p>
+                                                    <p>BW - Bay Window</p>
+                                                    <p>FW - Folding Window</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Row 5 -->
+                            <tr class="clickable-row">
+                                <td>5</td>
+                                <td><input type="number" class="no-border-input" id="quantity5" name="quantity5" step="any"></td>
+                                <td><input type="number" class="no-border-input" id="width5" name="width5" step="any"></td>
+                                <td>X</td>
+                                <td><input type="number" class="no-border-input" id="height5" name="height5" step="any"></td>
+                                <td><input type="checkbox" class="no-border-input" id="tempgl5" name="tempgl5" style="margin-left: 35px;"></td>
+                                <td>
+                                    <select name="window_type5" class="no-border-input">
+                                        <option value="none">-- none --</option>
+                                        <option value="xo_ox">XO or OX - 2 Lite Slider X is Active</option>
+                                        <option value="xox">XOX - 3 Lite Slider X is Active</option>
+                                        <option value="csmt">CSMT - Casement</option>
+                                        <option value="sh">SH - Single Hung</option>
+                                        <option value="pd">PD - Patio Door</option>
+                                        <option value="dh">DH - Double Hung</option>
+                                        <option value="xx">XX - 2 Lite (X Active)</option>
+                                        <option value="pw">PW - Picture Window</option>
+                                        <option value="awn">AWN - Awning</option>
+                                        <option value="fr">FR - Swing Door</option>
+                                        <option value="bf">BF - Bifold Window</option>
+                                        <option value="tt">TT - Tilt and Turn</option>
+                                        <option value="bw">BW - Bay Window</option>
+                                        <option value="fw">FW - Folding Window</option>
+                                    </select>
+                                </td>
+                                <td><input type="radio" name="h5" value="lh"></td>
+                                <td><input type="radio" name="h5" value="rh"></td>
+                                <td class="checkbox-cell"><input type="checkbox" id="bnb5" name="bnb5"></td>
+                                <td><input type="text" class="notes" name="notes5"></textarea></td>
+                            </tr>
+                            <tr class="extra-options">
+                                <td colspan="11">
+                                    <div class="options-section">
+                                        <div class="size-options">
+                                            <p><strong style="font-weight: normal;">Size Options</strong></p>
+                                            <label><input type="radio" name="Size_Options5" value="NES">Net/Exact Size</label><br>
+                                            <label><input type="radio" name="Size_Options5" value="RO">Rough Opening</label>
+                                        </div>
+                                        <div class="color-options">
+                                            <p><strong style="font-weight: normal;">Color Options</strong></p>
+                                            <label><input type="radio" name="color5" value="MB"> Matt Black</label><br>
+                                            <label><input type="radio" name="color5" value="MC"> Matt Chocolate</label><br>
+                                            <label><input type="radio" name="color5" value="MDG"> Matt Dark Grey</label><br>
+                                            <label><input type="radio" name="color5" value="MLG"> Matt Light Grey</label><br>
+                                            <label><input type="radio" name="color5" value="CG"> Champagne</label><br>
+                                            <label><input type="radio" name="color5" value="PW"> Pure White</label><br>
+                                            <label><input type="radio" name="color5" value="YW"> Yellow Wood</label><br>
+                                            <label><input type="radio" name="color5" value="GO"> Golden Oak</label><br>
+                                            <label><input type="radio" name="color5" value="YR"> Yellow Rosewood</label><br>
+                                            <label><input type="radio" name="color5" value="RS"> Red Sandalwood</label><br>
+                                            <label><input type="radio" name="color5" value="C"> Custom</label>
+                                        </div>
+                                        <div class="frame-options">
+                                            <p><strong style="font-weight: normal;">Frame Options</strong></p>
+                                            <label><input type="radio" name="Frame_Options5" value="NF">Nail Fin</label><br>
+                                            <label><input type="radio" name="Frame_Options5" value="SR">Stucco/Retro</label><br>
+                                            <label><input type="radio" name="Frame_Options5" value="B">Block</label>
+                                        </div>
+                                        <div class="grille-options">
+                                            <p><strong style="font-weight: normal;">Grille Options</strong></p>
+                                            <label><input type="radio" name="Grille_Options5" value="no">NA</label><br>
+                                            <label><input type="radio" name="Grille_Options5" value="yes">YES</label>
+                                        </div>
+                                        <div class="glass-options">
+                                            <p><strong style="font-weight: normal;">Glass Options</strong></p>
+                                            <label><input type="checkbox" name="LE5" value="on">Low-E</label><br>
+                                            <label><input type="checkbox" name="GT5" value="on">Grey Tinted</label><br>
+                                            <label><input type="checkbox" name="GR5" value="on">Grey Reflective</label><br>
+                                            <label><input type="checkbox" name="B5" value="on">Blue</label>
+                                        </div>
+                                        <div class="operating-types">
+                                            <p><strong style="font-weight: normal;">Window Operating Types</strong></p>
+                                            <div class="operating-options">
+                                                <div class="operating-left">
+                                                    <p>XO or OX - 2 Lite Slider X is Active</p>
+                                                    <p>XOX - 3 Lite Slider X is Active</p>
+                                                    <p>CSMT - Casement</p>
+                                                    <p>SH - Single Hung</p>
+                                                    <p>PD - Patio Door</p>
+                                                    <p>DH - Double Hung</p>
+                                                    <p>XX - 2 Lite (X Active)</p>
+                                                </div>
+                                                <div class="operating-right">
+                                                    <p>PW - Picture Window</p>
+                                                    <p>AWN - Awning</p>
+                                                    <p>FR - Swing Door</p>
+                                                    <p>BF - Bifold Window</p>
+                                                    <p>TT - Tilt and Turn</p>
+                                                    <p>BW - Bay Window</p>
+                                                    <p>FW - Folding Window</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Row 6 -->
+                            <tr class="clickable-row">
+                                <td>6</td>
+                                <td><input type="number" class="no-border-input" id="quantity6" name="quantity6" step="any"></td>
+                                <td><input type="number" class="no-border-input" id="width6" name="width6" step="any"></td>
+                                <td>X</td>
+                                <td><input type="number" class="no-border-input" id="height6" name="height6" step="any"></td>
+                                <td><input type="checkbox" class="no-border-input" id="tempgl6" name="tempgl6" style="margin-left: 35px;"></td>
+                                <td>
+                                    <select name="window_type6" class="no-border-input">
+                                        <option value="none">-- none --</option>
+                                        <option value="xo_ox">XO or OX - 2 Lite Slider X is Active</option>
+                                        <option value="xox">XOX - 3 Lite Slider X is Active</option>
+                                        <option value="csmt">CSMT - Casement</option>
+                                        <option value="sh">SH - Single Hung</option>
+                                        <option value="pd">PD - Patio Door</option>
+                                        <option value="dh">DH - Double Hung</option>
+                                        <option value="xx">XX - 2 Lite (X Active)</option>
+                                        <option value="pw">PW - Picture Window</option>
+                                        <option value="awn">AWN - Awning</option>
+                                        <option value="fr">FR - Swing Door</option>
+                                        <option value="bf">BF - Bifold Window</option>
+                                        <option value="tt">TT - Tilt and Turn</option>
+                                        <option value="bw">BW - Bay Window</option>
+                                        <option value="fw">FW - Folding Window</option>
+                                    </select>
+                                </td>
+                                <td><input type="radio" name="h6" value="lh"></td>
+                                <td><input type="radio" name="h6" value="rh"></td>
+                                <td class="checkbox-cell"><input type="checkbox" id="bnb6" name="bnb6"></td>
+                                <td><input type="text" class="notes" name="notes6"></textarea></td>
+                            </tr>
+                            <tr class="extra-options">
+                                <td colspan="11">
+                                    <div class="options-section">
+                                        <div class="size-options">
+                                            <p><strong style="font-weight: normal;">Size Options</strong></p>
+                                            <label><input type="radio" name="Size_Options6" value="NES">Net/Exact Size</label><br>
+                                            <label><input type="radio" name="Size_Options6" value="RO">Rough Opening</label>
+                                        </div>
+                                        <div class="color-options">
+                                            <p><strong style="font-weight: normal;">Color Options</strong></p>
+                                            <label><input type="radio" name="color6" value="MB"> Matt Black</label><br>
+                                            <label><input type="radio" name="color6" value="MC"> Matt Chocolate</label><br>
+                                            <label><input type="radio" name="color6" value="MDG"> Matt Dark Grey</label><br>
+                                            <label><input type="radio" name="color6" value="MLG"> Matt Light Grey</label><br>
+                                            <label><input type="radio" name="color6" value="CG"> Champagne</label><br>
+                                            <label><input type="radio" name="color6" value="PW"> Pure White</label><br>
+                                            <label><input type="radio" name="color6" value="YW"> Yellow Wood</label><br>
+                                            <label><input type="radio" name="color6" value="GO"> Golden Oak</label><br>
+                                            <label><input type="radio" name="color6" value="YR"> Yellow Rosewood</label><br>
+                                            <label><input type="radio" name="color6" value="RS"> Red Sandalwood</label><br>
+                                            <label><input type="radio" name="color6" value="C"> Custom</label>
+                                        </div>
+                                        <div class="frame-options">
+                                            <p><strong style="font-weight: normal;">Frame Options</strong></p>
+                                            <label><input type="radio" name="Frame_Options6">Nail Fin</label><br>
+                                            <label><input type="radio" name="Frame_Options6">Stucco/Retro</label><br>
+                                            <label><input type="radio" name="Frame_Options6">Block</label>
+                                        </div>
+                                        <div class="grille-options">
+                                            <p><strong style="font-weight: normal;">Grille Options</strong></p>
+                                            <label><input type="radio" name="Grille_Options6">NA</label><br>
+                                            <label><input type="radio" name="Grille_Options6">YES</label>
+                                        </div>
+                                        <div class="glass-options">
+                                            <p><strong style="font-weight: normal;">Glass Options</strong></p>
+                                            <label><input type="checkbox" name="LE6" value="on">Low-E</label><br>
+                                            <label><input type="checkbox" name="GT6" value="on">Grey Tinted</label><br>
+                                            <label><input type="checkbox" name="GR6" value="on">Grey Reflective</label><br>
+                                            <label><input type="checkbox" name="B6" value="on">Blue</label>
+                                        </div>
+                                        <div class="operating-types">
+                                            <p><strong style="font-weight: normal;">Window Operating Types</strong></p>
+                                            <div class="operating-options">
+                                                <div class="operating-left">
+                                                    <p>XO or OX - 2 Lite Slider X is Active</p>
+                                                    <p>XOX - 3 Lite Slider X is Active</p>
+                                                    <p>CSMT - Casement</p>
+                                                    <p>SH - Single Hung</p>
+                                                    <p>PD - Patio Door</p>
+                                                    <p>DH - Double Hung</p>
+                                                    <p>XX - 2 Lite (X Active)</p>
+                                                </div>
+                                                <div class="operating-right">
+                                                    <p>PW - Picture Window</p>
+                                                    <p>AWN - Awning</p>
+                                                    <p>FR - Swing Door</p>
+                                                    <p>BF - Bifold Window</p>
+                                                    <p>TT - Tilt and Turn</p>
+                                                    <p>BW - Bay Window</p>
+                                                    <p>FW - Folding Window</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>  
+                          <!-- Row 7 -->
+                            <tr class="clickable-row">
+                                <td>7</td>
+                                <td><input type="number" class="no-border-input" id="quantity7" name="quantity7" step="any"></td>
+                                <td><input type="number" class="no-border-input" id="width7" name="width7" step="any"></td>
+                                <td>X</td>
+                                <td><input type="number" class="no-border-input" id="height7" name="height7" step="any"></td>
+                                <td><input type="checkbox" class="no-border-input" id="tempgl7" name="tempgl7" style="margin-left: 35px;"></td>
+                                <td>
+                                    <select name="window_type7" class="no-border-input">
+                                        <option value="none">-- none --</option>
+                                        <option value="xo_ox">XO or OX - 2 Lite Slider X is Active</option>
+                                        <option value="xox">XOX - 3 Lite Slider X is Active</option>
+                                        <option value="csmt">CSMT - Casement</option>
+                                        <option value="sh">SH - Single Hung</option>
+                                        <option value="pd">PD - Patio Door</option>
+                                        <option value="dh">DH - Double Hung</option>
+                                        <option value="xx">XX - 2 Lite (X Active)</option>
+                                        <option value="pw">PW - Picture Window</option>
+                                        <option value="awn">AWN - Awning</option>
+                                        <option value="fr">FR - Swing Door</option>
+                                        <option value="bf">BF - Bifold Window</option>
+                                        <option value="tt">TT - Tilt and Turn</option>
+                                        <option value="bw">BW - Bay Window</option>
+                                        <option value="fw">FW - Folding Window</option>
+                                    </select>
+                                </td>
+                                <td><input type="radio" name="h7" value="lh"></td>
+                                <td><input type="radio" name="h7" value="rh"></td>
+                                <td class="checkbox-cell"><input type="checkbox" id="bnb7" name="bnb7"></td>
+                                <td><input type="text" class="notes" name="notes7"></textarea></td>
+                            </tr>
+                            <tr class="extra-options">
+                                <td colspan="11">
+                                    <div class="options-section">
+                                        <div class="size-options">
+                                            <p><strong style="font-weight: normal;">Size Options</strong></p>
+                                            <label><input type="radio" name="Size_Options7" value="NES">Net/Exact Size</label><br>
+                                            <label><input type="radio" name="Size_Options7" value="RO">Rough Opening</label>
+                                        </div>
+                                        <div class="color-options">
+                                            <p><strong style="font-weight: normal;">Color Options</strong></p>
+                                            <label><input type="radio" name="color7" value="MB"> Matt Black</label><br>
+                                            <label><input type="radio" name="color7" value="MC"> Matt Chocolate</label><br>
+                                            <label><input type="radio" name="color7" value="MDG"> Matt Dark Grey</label><br>
+                                            <label><input type="radio" name="color7" value="MLG"> Matt Light Grey</label><br>
+                                            <label><input type="radio" name="color7" value="CG"> Champagne</label><br>
+                                            <label><input type="radio" name="color7" value="PW"> Pure White</label><br>
+                                            <label><input type="radio" name="color7" value="YW"> Yellow Wood</label><br>
+                                            <label><input type="radio" name="color7" value="GO"> Golden Oak</label><br>
+                                            <label><input type="radio" name="color7" value="YR"> Yellow Rosewood</label><br>
+                                            <label><input type="radio" name="color7" value="RS"> Red Sandalwood</label><br>
+                                            <label><input type="radio" name="color7" value="C"> Custom</label>
+                                        </div>
+                                        <div class="frame-options">
+                                            <p><strong style="font-weight: normal;">Frame Options</strong></p>
+                                            <label><input type="radio" name="Frame_Options7">Nail Fin</label><br>
+                                            <label><input type="radio" name="Frame_Options7">Stucco/Retro</label><br>
+                                            <label><input type="radio" name="Frame_Options7">Block</label>
+                                        </div>
+                                        <div class="grille-options">
+                                            <p><strong style="font-weight: normal;">Grille Options</strong></p>
+                                            <label><input type="radio" name="Grille_Options7">NA</label><br>
+                                            <label><input type="radio" name="Grille_Options7">YES</label>
+                                        </div>
+                                        <div class="glass-options">
+                                            <p><strong style="font-weight: normal;">Glass Options</strong></p>
+                                            <label><input type="checkbox" name="LE7" value="on">Low-E</label><br>
+                                            <label><input type="checkbox" name="GT7" value="on">Grey Tinted</label><br>
+                                            <label><input type="checkbox" name="GR7" value="on">Grey Reflective</label><br>
+                                            <label><input type="checkbox" name="B7" value="on">Blue</label>
+                                        </div>
+                                        <div class="operating-types">
+                                            <p><strong style="font-weight: normal;">Window Operating Types</strong></p>
+                                            <div class="operating-options">
+                                                <div class="operating-left">
+                                                    <p>XO or OX - 2 Lite Slider X is Active</p>
+                                                    <p>XOX - 3 Lite Slider X is Active</p>
+                                                    <p>CSMT - Casement</p>
+                                                    <p>SH - Single Hung</p>
+                                                    <p>PD - Patio Door</p>
+                                                    <p>DH - Double Hung</p>
+                                                    <p>XX - 2 Lite (X Active)</p>
+                                                </div>
+                                                <div class="operating-right">
+                                                    <p>PW - Picture Window</p>
+                                                    <p>AWN - Awning</p>
+                                                    <p>FR - Swing Door</p>
+                                                    <p>BF - Bifold Window</p>
+                                                    <p>TT - Tilt and Turn</p>
+                                                    <p>BW - Bay Window</p>
+                                                    <p>FW - Folding Window</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>  
+                           <!-- Row 8 -->
+                            <tr class="clickable-row">
+                                <td>8</td>
+                                <td><input type="number" class="no-border-input" id="quantity8" name="quantity8" step="any"></td>
+                                <td><input type="number" class="no-border-input" id="width8" name="width8" step="any"></td>
+                                <td>X</td>
+                                <td><input type="number" class="no-border-input" id="height8" name="height8" step="any"></td>
+                                <td><input type="checkbox" class="no-border-input" id="tempgl8" name="tempgl8" style="margin-left: 35px;"></td>
+                                <td>
+                                    <select name="window_type8" class="no-border-input">
+                                        <option value="none">-- none --</option>
+                                        <option value="xo_ox">XO or OX - 2 Lite Slider X is Active</option>
+                                        <option value="xox">XOX - 3 Lite Slider X is Active</option>
+                                        <option value="csmt">CSMT - Casement</option>
+                                        <option value="sh">SH - Single Hung</option>
+                                        <option value="pd">PD - Patio Door</option>
+                                        <option value="dh">DH - Double Hung</option>
+                                        <option value="xx">XX - 2 Lite (X Active)</option>
+                                        <option value="pw">PW - Picture Window</option>
+                                        <option value="awn">AWN - Awning</option>
+                                        <option value="fr">FR - Swing Door</option>
+                                        <option value="bf">BF - Bifold Window</option>
+                                        <option value="tt">TT - Tilt and Turn</option>
+                                        <option value="bw">BW - Bay Window</option>
+                                        <option value="fw">FW - Folding Window</option>
+                                    </select>
+                                </td>
+                                <td><input type="radio" name="h8" value="lh"></td>
+                                <td><input type="radio" name="h8" value="rh"></td>
+                                <td class="checkbox-cell"><input type="checkbox" id="bnb8" name="bnb8"></td>
+                                <td><input type="text" class="notes" name="notes8"></textarea></td>
+                            </tr>
+                            <tr class="extra-options">
+                                <td colspan="11">
+                                    <div class="options-section">
+                                        <div class="size-options">
+                                            <p><strong style="font-weight: normal;">Size Options</strong></p>
+                                            <label><input type="radio" name="Size_Options8">Net/Exact Size</label><br>
+                                            <label><input type="radio" name="Size_Options8">Rough Opening</label>
+                                        </div>
+                                        <div class="color-options">
+                                            <p><strong style="font-weight: normal;">Color Options</strong></p>
+                                            <label><input type="radio" name="color8"> Matt Black</label><br>
+                                            <label><input type="radio" name="color8"> Matt Chocolate</label><br>
+                                            <label><input type="radio" name="color8"> Matt Dark Grey</label><br>
+                                            <label><input type="radio" name="color8"> Matt Light Grey</label><br>
+                                            <label><input type="radio" name="color8"> Champagne</label><br>
+                                            <label><input type="radio" name="color8"> Pure White</label><br>
+                                            <label><input type="radio" name="color8"> Yellow Wood</label><br>
+                                            <label><input type="radio" name="color8"> Golden Oak</label><br>
+                                            <label><input type="radio" name="color8"> Yellow Rosewood</label><br>
+                                            <label><input type="radio" name="color8"> Red Sandalwood</label><br>
+                                            <label><input type="radio" name="color8"> Custom</label>
+                                        </div>
+                                        <div class="frame-options">
+                                            <p><strong style="font-weight: normal;">Frame Options</strong></p>
+                                            <label><input type="radio" name="Frame_Options8">Nail Fin</label><br>
+                                            <label><input type="radio" name="Frame_Options8">Stucco/Retro</label><br>
+                                            <label><input type="radio" name="Frame_Options8">Block</label>
+                                        </div>
+                                        <div class="grille-options">
+                                            <p><strong style="font-weight: normal;">Grille Options</strong></p>
+                                            <label><input type="radio" name="Grille_Options8">NA</label><br>
+                                            <label><input type="radio" name="Grille_Options8">YES</label>
+                                        </div>
+                                        <div class="glass-options">
+                                            <p><strong style="font-weight: normal;">Glass Options</strong></p>
+                                            <label><input type="checkbox" name="LE8" value="on">Low-E</label><br>
+                                            <label><input type="checkbox" name="GT8" value="on">Grey Tinted</label><br>
+                                            <label><input type="checkbox" name="GR8" value="on">Grey Reflective</label><br>
+                                            <label><input type="checkbox" name="B8" value="on">Blue</label>
+                                        </div>
+                                        <div class="operating-types">
+                                            <p><strong style="font-weight: normal;">Window Operating Types</strong></p>
+                                            <div class="operating-options">
+                                                <div class="operating-left">
+                                                    <p>XO or OX - 2 Lite Slider X is Active</p>
+                                                    <p>XOX - 3 Lite Slider X is Active</p>
+                                                    <p>CSMT - Casement</p>
+                                                    <p>SH - Single Hung</p>
+                                                    <p>PD - Patio Door</p>
+                                                    <p>DH - Double Hung</p>
+                                                    <p>XX - 2 Lite (X Active)</p>
+                                                </div>
+                                                <div class="operating-right">
+                                                    <p>PW - Picture Window</p>
+                                                    <p>AWN - Awning</p>
+                                                    <p>FR - Swing Door</p>
+                                                    <p>BF - Bifold Window</p>
+                                                    <p>TT - Tilt and Turn</p>
+                                                    <p>BW - Bay Window</p>
+                                                    <p>FW - Folding Window</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Row 9 -->
+                            <tr class="clickable-row">
+                                <td>9</td>
+                                <td><input type="number" class="no-border-input" id="quantity9" name="quantity9" step="any"></td>
+                                <td><input type="number" class="no-border-input" id="width9" name="width9" step="any"></td>
+                                <td>X</td>
+                                <td><input type="number" class="no-border-input" id="height9" name="height9" step="any"></td>
+                                <td><input type="checkbox" class="no-border-input" id="tempgl9" name="tempgl9" style="margin-left: 35px;"></td>
+                                <td>
+                                    <select name="window_type9" class="no-border-input">
+                                        <option value="none">-- none --</option>
+                                        <option value="xo_ox">XO or OX - 2 Lite Slider X is Active</option>
+                                        <option value="xox">XOX - 3 Lite Slider X is Active</option>
+                                        <option value="csmt">CSMT - Casement</option>
+                                        <option value="sh">SH - Single Hung</option>
+                                        <option value="pd">PD - Patio Door</option>
+                                        <option value="dh">DH - Double Hung</option>
+                                        <option value="xx">XX - 2 Lite (X Active)</option>
+                                        <option value="pw">PW - Picture Window</option>
+                                        <option value="awn">AWN - Awning</option>
+                                        <option value="fr">FR - Swing Door</option>
+                                        <option value="bf">BF - Bifold Window</option>
+                                        <option value="tt">TT - Tilt and Turn</option>
+                                        <option value="bw">BW - Bay Window</option>
+                                        <option value="fw">FW - Folding Window</option>
+                                    </select>
+                                </td>
+                                <td><input type="radio" name="h9" value="lh"></td>
+                                <td><input type="radio" name="h9" value="rh"></td>
+                                <td class="checkbox-cell"><input type="checkbox" id="bnb9" name="bnb9"></td>
+                                <td><input type="text" class="notes" name="notes9"></textarea></td>
+                            </tr>
+                            <tr class="extra-options">
+                                <td colspan="11">
+                                    <div class="options-section">
+                                        <div class="size-options">
+                                            <p><strong style="font-weight: normal;">Size Options</strong></p>
+                                            <label><input type="radio" name="Size_Options9">Net/Exact Size</label><br>
+                                            <label><input type="radio" name="Size_Options9">Rough Opening</label>
+                                        </div>
+                                        <div class="color-options">
+                                            <p><strong style="font-weight: normal;">Color Options</strong></p>
+                                            <label><input type="radio" name="color9"> Matt Black</label><br>
+                                            <label><input type="radio" name="color9"> Matt Chocolate</label><br>
+                                            <label><input type="radio" name="color9"> Matt Dark Grey</label><br>
+                                            <label><input type="radio" name="color9"> Matt Light Grey</label><br>
+                                            <label><input type="radio" name="color9"> Champagne</label><br>
+                                            <label><input type="radio" name="color9"> Pure White</label><br>
+                                            <label><input type="radio" name="color9"> Yellow Wood</label><br>
+                                            <label><input type="radio" name="color9"> Golden Oak</label><br>
+                                            <label><input type="radio" name="color9"> Yellow Rosewood</label><br>
+                                            <label><input type="radio" name="color9"> Red Sandalwood</label><br>
+                                            <label><input type="radio" name="color9"> Custom</label>
+                                        </div>
+                                        <div class="frame-options">
+                                            <p><strong style="font-weight: normal;">Frame Options</strong></p>
+                                            <label><input type="radio" name="Frame_Options9">Nail Fin</label><br>
+                                            <label><input type="radio" name="Frame_Options9">Stucco/Retro</label><br>
+                                            <label><input type="radio" name="Frame_Options9">Block</label>
+                                        </div>
+                                        <div class="grille-options">
+                                            <p><strong style="font-weight: normal;">Grille Options</strong></p>
+                                            <label><input type="radio" name="Grille_Options9">NA</label><br>
+                                            <label><input type="radio" name="Grille_Options9">YES</label>
+                                        </div>
+                                        <div class="glass-options">
+                                            <p><strong style="font-weight: normal;">Glass Options</strong></p>
+                                            <label><input type="checkbox" name="LE9"value="on">Low-E</label><br>
+                                            <label><input type="checkbox" name="GT9"value="on">Grey Tinted</label><br>
+                                            <label><input type="checkbox" name="GR9"value="on">Grey Reflective</label><br>
+                                            <label><input type="checkbox" name="B9" value="on">Blue</label>
+                                        </div>
+                                        <div class="operating-types">
+                                            <p><strong style="font-weight: normal;">Window Operating Types</strong></p>
+                                            <div class="operating-options">
+                                                <div class="operating-left">
+                                                    <p>XO or OX - 2 Lite Slider X is Active</p>
+                                                    <p>XOX - 3 Lite Slider X is Active</p>
+                                                    <p>CSMT - Casement</p>
+                                                    <p>SH - Single Hung</p>
+                                                    <p>PD - Patio Door</p>
+                                                    <p>DH - Double Hung</p>
+                                                    <p>XX - 2 Lite (X Active)</p>
+                                                </div>
+                                                <div class="operating-right">
+                                                    <p>PW - Picture Window</p>
+                                                    <p>AWN - Awning</p>
+                                                    <p>FR - Swing Door</p>
+                                                    <p>BF - Bifold Window</p>
+                                                    <p>TT - Tilt and Turn</p>
+                                                    <p>BW - Bay Window</p>
+                                                    <p>FW - Folding Window</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Row 10 -->
+                            <tr class="clickable-row">
+                                <td>10</td>
+                                <td><input type="number" class="no-border-input" id="quantity10" name="quantity10" step="any"></td>
+                                <td><input type="number" class="no-border-input" id="width10" name="width10" step="any"></td>
+                                <td>X</td>
+                                <td><input type="number" class="no-border-input" id="height10" name="height10" step="any"></td>
+                                <td><input type="checkbox" class="no-border-input" id="tempgl10" name="tempgl10" style="margin-left: 35px;"></td>
+                                <td>
+                                    <select name="window_type10" class="no-border-input">
+                                        <option value="none">-- none --</option>
+                                        <option value="xo_ox">XO or OX - 2 Lite Slider X is Active</option>
+                                        <option value="xox">XOX - 3 Lite Slider X is Active</option>
+                                        <option value="csmt">CSMT - Casement</option>
+                                        <option value="sh">SH - Single Hung</option>
+                                        <option value="pd">PD - Patio Door</option>
+                                        <option value="dh">DH - Double Hung</option>
+                                        <option value="xx">XX - 2 Lite (X Active)</option>
+                                        <option value="pw">PW - Picture Window</option>
+                                        <option value="awn">AWN - Awning</option>
+                                        <option value="fr">FR - Swing Door</option>
+                                        <option value="bf">BF - Bifold Window</option>
+                                        <option value="tt">TT - Tilt and Turn</option>
+                                        <option value="bw">BW - Bay Window</option>
+                                        <option value="fw">FW - Folding Window</option>
+                                    </select>
+                                </td>
+                               <td><input type="radio" name="h10" value="lh"></td>
+                               <td><input type="radio" name="h10" value="rh"></td>
+                                <td class="checkbox-cell"><input type="checkbox" id="bnb10" name="bnb10"></td>
+                                <td><input type="text" class="notes" name="notes10"></textarea></td>
+                            </tr>
+                            <tr class="extra-options">
+                                <td colspan="11">
+                                    <div class="options-section">
+                                        <div class="size-options">
+                                            <p><strong style="font-weight: normal;">Size Options</strong></p>
+                                            <label><input type="radio" name="Size_Options10">Net/Exact Size</label><br>
+                                            <label><input type="radio" name="Size_Options10">Rough Opening</label>
+                                        </div>
+                                        <div class="color-options">
+                                            <p><strong style="font-weight: normal;">Color Options</strong></p>
+                                            <label><input type="radio" name="color10"> Matt Black</label><br>
+                                            <label><input type="radio" name="color10"> Matt Chocolate</label><br>
+                                            <label><input type="radio" name="color10"> Matt Dark Grey</label><br>
+                                            <label><input type="radio" name="color10"> Matt Light Grey</label><br>
+                                            <label><input type="radio" name="color10"> Champagne</label><br>
+                                            <label><input type="radio" name="color10"> Pure White</label><br>
+                                            <label><input type="radio" name="color10"> Yellow Wood</label><br>
+                                            <label><input type="radio" name="color10"> Golden Oak</label><br>
+                                            <label><input type="radio" name="color10"> Yellow Rosewood</label><br>
+                                            <label><input type="radio" name="color10"> Red Sandalwood</label><br>
+                                            <label><input type="radio" name="color10"> Custom</label>
+                                        </div>
+                                        <div class="frame-options">
+                                            <p><strong style="font-weight: normal;">Frame Options</strong></p>
+                                            <label><input type="radio" name="Frame_Options10">Nail Fin</label><br>
+                                            <label><input type="radio" name="Frame_Options10">Stucco/Retro</label><br>
+                                            <label><input type="radio" name="Frame_Options10">Block</label>
+                                        </div>
+                                        <div class="grille-options">
+                                            <p><strong style="font-weight: normal;">Grille Options</strong></p>
+                                            <label><input type="radio" name="Grille_Options10">NA</label><br>
+                                            <label><input type="radio" name="Grille_Options10">YES</label>
+                                        </div>
+                                        <div class="glass-options">
+                                            <p><strong style="font-weight: normal;">Glass Options</strong></p>
+                                            <label><input type="checkbox" name="LE10" value="on">Low-E</label><br>
+                                            <label><input type="checkbox" name="GT10" value="on">Grey Tinted</label><br>
+                                            <label><input type="checkbox" name="GR10" value="on">Grey Reflective</label><br>
+                                            <label><input type="checkbox" name="B10" value="on">Blue</label>
+                                        </div>
+                                        <div class="operating-types">
+                                            <p><strong style="font-weight: normal;">Window Operating Types</strong></p>
+                                            <div class="operating-options">
+                                                <div class="operating-left">
+                                                    <p>XO or OX - 2 Lite Slider X is Active</p>
+                                                    <p>XOX - 3 Lite Slider X is Active</p>
+                                                    <p>CSMT - Casement</p>
+                                                    <p>SH - Single Hung</p>
+                                                    <p>PD - Patio Door</p>
+                                                    <p>DH - Double Hung</p>
+                                                    <p>XX - 2 Lite (X Active)</p>
+                                                </div>
+                                                <div class="operating-right">
+                                                    <p>PW - Picture Window</p>
+                                                    <p>AWN - Awning</p>
+                                                    <p>FR - Swing Door</p>
+                                                    <p>BF - Bifold Window</p>
+                                                    <p>TT - Tilt and Turn</p>
+                                                    <p>BW - Bay Window</p>
+                                                    <p>FW - Folding Window</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="clickable-row">
+                                <td>11</td>
+                                <td><input type="number" class="no-border-input" id="quantity11" name="quantity11" step="any"></td>
+                                <td><input type="number" class="no-border-input" id="width11" name="width11" step="any"></td>
+                                <td>X</td>
+                                <td><input type="number" class="no-border-input" id="height11" name="height11" step="any"></td>
+                                <td><input type="checkbox" class="no-border-input" id="tempgl11" name="tempgl11" style="margin-left: 35px;"></td>
+                                <td>
+                                    <select name="window_type11" class="no-border-input">
+                                        <option value="none">-- none --</option>
+                                        <option value="xo_ox">XO or OX - 2 Lite Slider X is Active</option>
+                                        <option value="xox">XOX - 3 Lite Slider X is Active</option>
+                                        <option value="csmt">CSMT - Casement</option>
+                                        <option value="sh">SH - Single Hung</option>
+                                        <option value="pd">PD - Patio Door</option>
+                                        <option value="dh">DH - Double Hung</option>
+                                        <option value="xx">XX - 2 Lite (X Active)</option>
+                                        <option value="pw">PW - Picture Window</option>
+                                        <option value="awn">AWN - Awning</option>
+                                        <option value="fr">FR - Swing Door</option>
+                                        <option value="bf">BF - Bifold Window</option>
+                                        <option value="tt">TT - Tilt and Turn</option>
+                                        <option value="bw">BW - Bay Window</option>
+                                        <option value="fw">FW - Folding Window</option>
+                                    </select>
+                                </td>
+                                <td><input type="radio" name="h11" value="lh"></td>
+                                <td><input type="radio" name="h11" value="rh"></td>
+                                <td class="checkbox-cell"><input type="checkbox" id="bnb11" name="bnb11"></td>
+                                <td><input type="text" class="notes" name="notes11"></textarea></td>
+                            </tr>
+                            <tr class="extra-options">
+                                <td colspan="11">
+                                    <div class="options-section">
+                                        <div class="size-options">
+                                            <p><strong style="font-weight: normal;">Size Options</strong></p>
+                                            <label><input type="radio" name="Size_Options11">Net/Exact Size</label><br>
+                                            <label><input type="radio" name="Size_Options11">Rough Opening</label>
+                                        </div>
+                                        <div class="color-options">
+                                            <p><strong style="font-weight: normal;">Color Options</strong></p>
+                                            <label><input type="radio" name="color11"> Matt Black</label><br>
+                                            <label><input type="radio" name="color11"> Matt Chocolate</label><br>
+                                            <label><input type="radio" name="color11"> Matt Dark Grey</label><br>
+                                            <label><input type="radio" name="color11"> Matt Light Grey</label><br>
+                                            <label><input type="radio" name="color11"> Champagne</label><br>
+                                            <label><input type="radio" name="color11"> Pure White</label><br>
+                                            <label><input type="radio" name="color11"> Yellow Wood</label><br>
+                                            <label><input type="radio" name="color11"> Golden Oak</label><br>
+                                            <label><input type="radio" name="color11"> Yellow Rosewood</label><br>
+                                            <label><input type="radio" name="color11"> Red Sandalwood</label><br>
+                                            <label><input type="radio" name="color11"> Custom</label>
+                                        </div>
+                                        <div class="frame-options">
+                                            <p><strong style="font-weight: normal;">Frame Options</strong></p>
+                                            <label><input type="radio" name="Frame_Options11">Nail Fin</label><br>
+                                            <label><input type="radio" name="Frame_Options11">Stucco/Retro</label><br>
+                                            <label><input type="radio" name="Frame_Options11">Block</label>
+                                        </div>
+                                        <div class="grille-options">
+                                            <p><strong style="font-weight: normal;">Grille Options</strong></p>
+                                            <label><input type="radio" name="Grille_Options11">NA</label><br>
+                                            <label><input type="radio" name="Grille_Options11">YES</label>
+                                        </div>
+                                        <div class="glass-options">
+                                            <p><strong style="font-weight: normal;">Glass Options</strong></p>
+                                            <label><input type="checkbox" name="LE11" value="on">Low-E</label><br>
+                                            <label><input type="checkbox" name="GT11" value="on">Grey Tinted</label><br>
+                                            <label><input type="checkbox" name="GR11" value="on">Grey Reflective</label><br>
+                                            <label><input type="checkbox" name="B11" value="on">Blue</label>
+                                        </div>
+                                        <div class="operating-types">
+                                            <p><strong style="font-weight: normal;">Window Operating Types</strong></p>
+                                            <div class="operating-options">
+                                                <div class="operating-left">
+                                                    <p>XO or OX - 2 Lite Slider X is Active</p>
+                                                    <p>XOX - 3 Lite Slider X is Active</p>
+                                                    <p>CSMT - Casement</p>
+                                                    <p>SH - Single Hung</p>
+                                                    <p>PD - Patio Door</p>
+                                                    <p>DH - Double Hung</p>
+                                                    <p>XX - 2 Lite (X Active)</p>
+                                                </div>
+                                                <div class="operating-right">
+                                                    <p>PW - Picture Window</p>
+                                                    <p>AWN - Awning</p>
+                                                    <p>FR - Swing Door</p>
+                                                    <p>BF - Bifold Window</p>
+                                                    <p>TT - Tilt and Turn</p>
+                                                    <p>BW - Bay Window</p>
+                                                    <p>FW - Folding Window</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="clickable-row">
+                                <td>12</td>
+                                <td><input type="number" class="no-border-input" id="quantity12" name="quantity12" step="any"></td>
+                                <td><input type="number" class="no-border-input" id="width12" name="width12" step="any"></td>
+                                <td>X</td>
+                                <td><input type="number" class="no-border-input" id="height12" name="height12" step="any"></td>
+                                <td><input type="checkbox" class="no-border-input" id="tempgl12" name="tempgl12" style="margin-left: 35px;"></td>
+                                <td>
+                                    <select name="window_type12" class="no-border-input">
+                                        <option value="none">-- none --</option>
+                                        <option value="xo_ox">XO or OX - 2 Lite Slider X is Active</option>
+                                        <option value="xox">XOX - 3 Lite Slider X is Active</option>
+                                        <option value="csmt">CSMT - Casement</option>
+                                        <option value="sh">SH - Single Hung</option>
+                                        <option value="pd">PD - Patio Door</option>
+                                        <option value="dh">DH - Double Hung</option>
+                                        <option value="xx">XX - 2 Lite (X Active)</option>
+                                        <option value="pw">PW - Picture Window</option>
+                                        <option value="awn">AWN - Awning</option>
+                                        <option value="fr">FR - Swing Door</option>
+                                        <option value="bf">BF - Bifold Window</option>
+                                        <option value="tt">TT - Tilt and Turn</option>
+                                        <option value="bw">BW - Bay Window</option>
+                                        <option value="fw">FW - Folding Window</option>
+                                    </select>
+                                </td>
+                                <td><input type="radio" name="h12" value="lh"></td>
+                                <td><input type="radio" name="h12" value="rh"></td>
+                                <td class="checkbox-cell"><input type="checkbox" id="bnb12" name="bnb12"></td>
+                                <td><input type="text" class="notes" name="notes12"></textarea></td>
+                            </tr>
+                            <tr class="extra-options">
+                                <td colspan="11">
+                                    <div class="options-section">
+                                        <div class="size-options">
+                                            <p><strong style="font-weight: normal;">Size Options</strong></p>
+                                            <label><input type="radio" name="Size_Options12">Net/Exact Size</label><br>
+                                            <label><input type="radio" name="Size_Options12">Rough Opening</label>
+                                        </div>
+                                        <div class="color-options">
+                                            <p><strong style="font-weight: normal;">Color Options</strong></p>
+                                            <label><input type="radio" name="color12"> Matt Black</label><br>
+                                            <label><input type="radio" name="color12"> Matt Chocolate</label><br>
+                                            <label><input type="radio" name="color12"> Matt Dark Grey</label><br>
+                                            <label><input type="radio" name="color12"> Matt Light Grey</label><br>
+                                            <label><input type="radio" name="color12"> Champagne</label><br>
+                                            <label><input type="radio" name="color12"> Pure White</label><br>
+                                            <label><input type="radio" name="color12"> Yellow Wood</label><br>
+                                            <label><input type="radio" name="color12"> Golden Oak</label><br>
+                                            <label><input type="radio" name="color12"> Yellow Rosewood</label><br>
+                                            <label><input type="radio" name="color12"> Red Sandalwood</label><br>
+                                            <label><input type="radio" name="color12"> Custom</label>
+                                        </div>
+                                        <div class="frame-options">
+                                            <p><strong style="font-weight: normal;">Frame Options</strong></p>
+                                            <label><input type="radio" name="Frame_Options12">Nail Fin</label><br>
+                                            <label><input type="radio" name="Frame_Options12">Stucco/Retro</label><br>
+                                            <label><input type="radio" name="Frame_Options12">Block</label>
+                                        </div>
+                                        <div class="grille-options">
+                                            <p><strong style="font-weight: normal;">Grille Options</strong></p>
+                                            <label><input type="radio" name="Grille_Options12">NA</label><br>
+                                            <label><input type="radio" name="Grille_Options12">YES</label>
+                                        </div>
+                                        <div class="glass-options">
+                                            <p><strong style="font-weight: normal;">Glass Options</strong></p>
+                                            <label><input type="checkbox" name="LE12" value="on">Low-E</label><br>
+                                            <label><input type="checkbox" name="GT12" value="on">Grey Tinted</label><br>
+                                            <label><input type="checkbox" name="GR12" value="on">Grey Reflective</label><br>
+                                            <label><input type="checkbox" name="B12" value="on">Blue</label>
+                                        </div>
+                                        <div class="operating-types">
+                                            <p><strong style="font-weight: normal;">Window Operating Types</strong></p>
+                                            <div class="operating-options">
+                                                <div class="operating-left">
+                                                    <p>XO or OX - 2 Lite Slider X is Active</p>
+                                                    <p>XOX - 3 Lite Slider X is Active</p>
+                                                    <p>CSMT - Casement</p>
+                                                    <p>SH - Single Hung</p>
+                                                    <p>PD - Patio Door</p>
+                                                    <p>DH - Double Hung</p>
+                                                    <p>XX - 2 Lite (X Active)</p>
+                                                </div>
+                                                <div class="operating-right">
+                                                    <p>PW - Picture Window</p>
+                                                    <p>AWN - Awning</p>
+                                                    <p>FR - Swing Door</p>
+                                                    <p>BF - Bifold Window</p>
+                                                    <p>TT - Tilt and Turn</p>
+                                                    <p>BW - Bay Window</p>
+                                                    <p>FW - Folding Window</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Repeat the structure for rows 10 to 24 -->
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <script src="{% static 'js/script.js' %}"></script>
+            <script>
+
+                document.addEventListener('DOMContentLoaded', function() {
+                            // Function to update the title based on the selected radio button
+                            function updateTitle() {
+                                const titleElement = document.getElementById('formTitle');
+                                const selectedOption = document.querySelector('input[name="QO"]:checked');
+
+                                if (selectedOption) {
+                                    if (selectedOption.value === 'quote') {
+                                        titleElement.textContent = 'Window Quote Form';
+                                    } else if (selectedOption.value === 'order') {
+                                        titleElement.textContent = 'Window Order Form';
+                                    }
+                                } else {
+                                    titleElement.textContent = 'WINDOW FORM';
+                                }
+                            }
+                        
+                            // Attach event listeners to radio buttons
+                            document.getElementById('quoteRadio').addEventListener('change', updateTitle);
+                            document.getElementById('orderRadio').addEventListener('change', updateTitle);
+
+                            // Initialize title on page load
+                            updateTitle();
+                });
+            </script>
+        </body>
+        </html>
+</form>
